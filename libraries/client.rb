@@ -7,12 +7,12 @@ require 'faraday'
 require 'json'
 
 module Habitat
-
   # Habitat Client
   #
   # This class is an API client to the Habitat Depot. It uses Faraday
   # under the covers to give us a nice HTTP interface.
-
+  #
+  # rubocop:disable ClassLength
   class Client
     attr_reader :depot, :connection
 
@@ -23,7 +23,8 @@ module Habitat
     #
     # === Attributes
     #
-    # * +depot+ - URL to the Habitat Depot, defaults to the public service run by the Habitat organization
+    # * +depot+ - URL to the Habitat Depot, defaults to the public
+    #             service run by the Habitat organization
     # * +connection+ - A Faraday object representing the HTTP connection
     #
     # === Examples
@@ -44,12 +45,12 @@ module Habitat
     # Downloads the specified key. By default, it will download to the
     # current directory as a file named by the +X-Filename+ HTTP
     # header.
-    def fetch_key(key, path = '.')
+    def fetch_key(_key, _path = '.')
       raise 'Downloading keys is not yet implemented'
     end
 
     # Uploads the specified key from the given path location.
-    def put_key(key, path)
+    def put_key(_key, _path)
       raise 'Uploading keys is not yet implemented'
     end
 
@@ -104,6 +105,7 @@ module Habitat
     end
 
     private
+
     # Returns the PackageIdent as a string with the version and/or
     # release qualified if not specified. For example, if +pkg+ is
     # +'core/zlib'+, it will return +'core/zlib/latest'+.
@@ -114,7 +116,7 @@ module Habitat
     # If the PackageIdent has four parts, it's fully qualified.
     def fully_qualified?(pkg)
       parts = package_ident(pkg).split('/')
-      return parts.count == 4 && parts.last != 'latest'
+      parts.count == 4 && parts.last != 'latest'
     end
 
     # Returns a URL path for retrieving the PackageIdent specified.
@@ -142,23 +144,26 @@ module Habitat
     # Resolves the latest version of the package returned by +show_package+
     def resolve_latest(pkg)
       latest = show_package(pkg)
-      ['origin', 'name', 'version', 'release'].map {|i| latest['ident'][i] }.join('/')
+      %w(origin name version release).map { |i| latest['ident'][i] }.join('/')
     end
 
     def validate_pkg_path!(pkg)
-      if ! fully_qualified?(pkg)
+      # rubocop:disable GuardClause
+      unless fully_qualified?(pkg)
         raise <<-EOH.gsub(/^\s+/, '')
           You must specify a fully qualified package path, such as:
 
               core/pandas/0.0.1/20160419213120
 
-          You specified `#{pkg}' in `#{caller_locations(1,1)[0].label}'
+          You specified `#{pkg}' in `#{caller_locations(1, 1)[0].label}'
         EOH
       end
     end
 
     # Opens a Habitat Artifact and reads the IDENT metadata to get the
     # fully qualified package identifier.
+    #
+    # rubocop:disable Metrics/MethodLength
     def derive_pkgid_from_file(file)
       require 'mixlib/shellout'
       tail_n = 'tail -n +6'
@@ -193,11 +198,13 @@ module Habitat
       if response.status == 200
         return true
       else
-        return "Depot server returned #{response.status} for promote request"
+        raise Habitat::PromotionError,
+              "Depot returned #{response.status} on promote"
       end
     end
 
     # Downloads the file from the depot.
+    #
     def download(url, path = '.')
       response = @connection.get(url)
       if response.status == 200
@@ -209,7 +216,8 @@ module Habitat
           fp.write(response.body)
         end
       else
-        raise Habitat::DownloadError, "Depot server returned #{response.status} for download request"
+        raise Habitat::DownloadError,
+              "Depot returned #{response.status} on download"
       end
     end
 
@@ -218,8 +226,9 @@ module Habitat
     # === Attributes
     # * +url+ - the URL path on the depot server
     # * +path+ - the file path to upload
+    #
     def upload(url, path)
-      payload = {file: Faraday::UploadIO.new(path, 'application/octet-stream')}
+      payload = { file: Faraday::UploadIO.new(path, 'application/octet-stream') }
       response = @connection.post do |req|
         req.url url
         req.params['checksum'] = blake2b_checksum(IO.read(path))
@@ -229,10 +238,10 @@ module Habitat
       if response.status == 200
         return true
       else
-        raise Habitat::UploadError, "Depot server returned #{response.status} for upload of '#{path}'"
+        raise Habitat::UploadError,
+              "Depot returned #{response.status} on uploading '#{path}'"
       end
     end
-
   end
 
   # Habitat Package Ident
@@ -243,9 +252,8 @@ module Habitat
   # have default values - 'latest' for +version+ and +release+. It
   # also implements a method to return the package identifier as a +/+
   # separated string for use in the Habitat Depot API
-
+  # rubocop:disable StructInheritance
   class PackageIdent < Struct.new(:origin, :pkg, :version, :release)
-
     # Creates the package identifier using the origin and package
     # name. Optionally will also use the version and release, or sets
     # them to latest if not specified.
@@ -280,7 +288,9 @@ module Habitat
     #
     #    Habitat::PackageIdent.new(*'core/zlib'.split('/'))
 
-    def initialize(origin, pkg, version = 'latest', release = 'latest'); super end
+    def initialize(origin, pkg, version = 'latest', release = 'latest')
+      super
+    end
 
     # Returns a string from a +Habitat::PackageIdent+ object separated by
     # +/+ (forward slash).
@@ -291,16 +301,15 @@ module Habitat
     #     zlib.to_s #=> "core/zlib/latest"
 
     def to_s
-      if self[:version] == 'latest'
-        parts = [self[:origin], self[:pkg], self[:version]]
-      else
-        parts = [self[:origin], self[:pkg], self[:version], self[:release]]
-      end
+      parts = if self[:version] == 'latest'
+                [self[:origin], self[:pkg], self[:version]]
+              else
+                [self[:origin], self[:pkg], self[:version], self[:release]]
+              end
       parts.join('/')
     end
   end
 end
-
 
 # So users don't have to remember +Habitat+ vs +Hab+
 module Hab
