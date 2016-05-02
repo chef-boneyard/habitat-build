@@ -1,0 +1,21 @@
+# Don't worry about the number of spaces between param and value.
+# This is used for styling in some Chef files.
+Style/SpaceBeforeFirstArg:
+  Enabled: false
+
+Style/SignalException:
+  Enabled: false
+
+Lint/DuplicateMethods:
+  Enabled: false
+
+# Don't force us to write documentation
+Documentation:
+    Enabled: false
+
+# Give us some breathing room on line length
+Metrics/LineLength:
+  Max: 90
+
+Style/Alias:
+  Enabled: false

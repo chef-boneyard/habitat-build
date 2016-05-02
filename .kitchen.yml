@@ -1,0 +1,19 @@
+---
+driver:
+  name: vagrant
+  synced_folders:
+    - [<%= File.join(ENV['PWD'], '..', '..')%>, '/tmp/repo-data']
+
+provisioner:
+  name: chef_zero
+  encrypted_data_bag_secret_key_path: 'secrets/fakey-mcfakerton'
+  data_bags_path: './data_bags'
+
+platforms:
+  - name: ubuntu-15.04
+
+suites:
+  - name: default
+    run_list:
+      - recipe[habitat-build::default]
+    attributes:
