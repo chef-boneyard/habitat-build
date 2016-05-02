@@ -24,3 +24,4 @@ vendor/
 .delivery/live.json
 .delivery/sandbox.json
 Berksfile.lock
+.delivery/cli.toml

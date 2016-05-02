@@ -26,10 +26,10 @@ hab_bpm_pkgident = node['habitat-build']['hab-bpm-pkgident']
 hab_studio_pkgident = node['habitat-build']['hab-studio-pkgident']
 
 ENV['PATH'] = [
-               "/hab/pkgs/#{hab_bpm_pkgident}/bin",
-               "/hab/pkgs/#{hab_studio_pkgident}/bin",
-               ENV['PATH']
-              ].join(':')
+  "/hab/pkgs/#{hab_bpm_pkgident}/bin",
+  "/hab/pkgs/#{hab_studio_pkgident}/bin",
+  ENV['PATH']
+].join(':')
 
 remote_file '/tmp/core-hab-bpm.hart' do
   source "#{node['habitat-build']['depot-url']}/pkgs/#{hab_bpm_pkgident}/download"
@@ -39,7 +39,7 @@ package 'xz-utils'
 
 # this needs to be extracted in / because reasons
 execute 'extract-hab-bpm' do
-  command "tail -n +6 /tmp/core-hab-bpm.hart | xzcat | tar xf - -C /"
+  command 'tail -n +6 /tmp/core-hab-bpm.hart | xzcat | tar xf - -C /'
 end
 
 directory ::File.join(ENV['HOME'], 'plans/pandas') do
@@ -60,7 +60,7 @@ end
 
 execute 'create-studio' do
   # TODO: (jtimberman) This needs to be a unique identifier for the workspace
-  command "hab-studio -r /hab/studios/build-cookbook new"
+  command 'hab-studio -r /hab/studios/build-cookbook new'
 end
 #
 # maybe we generate the key on build? it's fast...
@@ -73,7 +73,7 @@ end
 keyname = nil
 ruby_block 'keys' do
   block do
-    command = "/hab/pkgs/#{node['habitat-build']['hab-pkgident']}/bin/hab"
+    command = "/hab/pkgs/#{hab_pkgident}/bin/hab"
     command << ' origin key generate'
     command << ' build-cookbook'
     key_gen = shell_out(command)
@@ -92,5 +92,5 @@ end
 # end
 
 execute 'build-plan' do
-  command "hab-studio -r /hab/studios/build-cookbook build /src/plans/pandas"
+  command 'hab-studio -r /hab/studios/build-cookbook build /src/plans/pandas'
 end
