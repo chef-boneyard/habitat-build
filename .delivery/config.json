@@ -4,6 +4,11 @@
     "path": ".delivery/build-cookbook",
     "name": "build-cookbook"
   },
+  "delivery-truck": {
+    "publish": {
+      "github": "habitat-sh/habitat-build-cookbook"
+    }
+  },
   "skip_phases": [],
   "build_nodes": {},
   "dependencies": []
