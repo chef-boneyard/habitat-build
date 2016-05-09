@@ -2,4 +2,8 @@
 # Cookbook Name:: habitat-build
 # Recipe:: syntax
 #
-# Copyright (c) 2016 The Authors, All Rights Reserved.
+
+execute 'syntax-check-plan' do
+  command 'bash -n plan.sh'
+  cwd node['delivery']['workspace']['repo']
+end

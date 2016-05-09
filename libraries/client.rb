@@ -12,7 +12,6 @@ module Habitat
   # This class is an API client to the Habitat Depot. It uses Faraday
   # under the covers to give us a nice HTTP interface.
   #
-  # rubocop:disable ClassLength
   class Client
     attr_reader :depot, :connection
 
@@ -33,7 +32,7 @@ module Habitat
     #    hc = Habitat::Client.new('https://depot.habitat.sh')
     #    hc.connection.get('/pkgs')
 
-    def initialize(depot = 'http://willem.habitat.sh:9632')
+    def initialize(depot = 'http://willem.habitat.sh:9636/v1/depot')
       @depot = depot
       @connection = Faraday.new(url: @depot) do |f|
         f.request :multipart
@@ -163,7 +162,6 @@ module Habitat
     # Opens a Habitat Artifact and reads the IDENT metadata to get the
     # fully qualified package identifier.
     #
-    # rubocop:disable Metrics/MethodLength
     def derive_pkgid_from_file(file)
       require 'mixlib/shellout'
       tail_n = 'tail -n +6'

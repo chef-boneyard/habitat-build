@@ -15,7 +15,13 @@ Documentation:
 
 # Give us some breathing room on line length
 Metrics/LineLength:
-  Max: 90
+  Enabled: false
+
+Metrics/MethodLength:
+  Enabled: false
+
+Metrics/ClassLength:
+  Enabled: false
 
 Style/Alias:
   Enabled: false
