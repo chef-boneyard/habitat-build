@@ -6,7 +6,7 @@
   },
   "delivery-truck": {
     "publish": {
-      "github": "habitat-sh/habitat-build-cookbook"
+      "github": "chef-cookbooks/habitat-build"
     }
   },
   "skip_phases": [],
