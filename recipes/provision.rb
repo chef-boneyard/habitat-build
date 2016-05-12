@@ -19,6 +19,6 @@ end
 ruby_block 'promote-artifact' do
   block do
     hc = Habitat::Client.new
-    hc.promote_package(artifact_data['artifact_pkgident'], delivery_stage)
+    hc.promote_package(artifact_data['artifact_pkgident'], node['delivery']['change']['stage'])
   end
 end
