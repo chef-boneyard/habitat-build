@@ -32,6 +32,7 @@ plan_dir = if node['delivery']['config'].attribute?('habitat') &&
            end
 
 artifact = nil
+artifact_hash = nil
 artifact_pkgident = nil
 ruby_block 'build-plan' do
   block do
@@ -48,14 +49,41 @@ ruby_block 'build-plan' do
   end
 end
 
+ruby_block 'artifact-hash' do
+  block do
+    command = "/hab/pkgs/#{hab_pkgident}/bin/hab"
+    command << " artifact hash #{::File.join('/hab/studios/', studio_slug, artifact)}"
+    artifact_hash = shell_out(command).stdout.chomp
+  end
+end
+
 execute 'upload-artifact' do
   command lazy { "#{::File.join('/hab/pkgs', hab_pkgident, 'bin/hab')} artifact upload #{::File.join('/hab/studios/', studio_slug, artifact)}" }
 end
 
-ruby_block 'promote-artifact' do
+# update a data bag with the artifact build info
+# TODO: (jtimberman) This is not the first time this has been used in
+# a delivery build cookbook. It's probably time to create a Chef
+# resource for this functionality
+ruby_block 'track-artifact-data' do # ~FC014
   block do
-    hc = Habitat::Client.new
-    # TODO: (jtimberman) parameterize 'current' to the phase, or user input
-    hc.promote_package(artifact_pkgident, 'current')
+    load_delivery_chef_config
+    proj = Chef::DataBag.new
+    proj.name(project_slug)
+    proj.save
+
+    proj_data = {
+      'id' => Time.now.utc.strftime('%F_%H%M'),
+      'artifact_pkgident' => artifact_pkgident,
+      'artifact_path' => artifact,
+      'artifact_checksum' => artifact_hash,
+      'artifact_type' => 'hart',
+      'delivery_data' => node['delivery']
+    }
+
+    proj_item = Chef::DataBagItem.new
+    proj_item.data_bag(proj.name)
+    proj_item.raw_data = proj_data
+    proj_item.save
   end
 end
