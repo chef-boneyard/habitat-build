@@ -75,7 +75,7 @@ directory "/hab/studios/#{studio_slug}/hab/cache/keys" do
 end
 
 keyname = nil
-ruby_block 'keys' do
+ruby_block 'origin-key-generate' do
   block do
     Dir.chdir(node['delivery']['workspace']['repo'])
     command = "/hab/pkgs/#{hab_pkgident}/bin/hab"
@@ -83,6 +83,13 @@ ruby_block 'keys' do
     command << ' delivery'
     key_gen = shell_out(command)
     keyname = key_gen.stdout.split.last
+  end
+end
+
+%w(pub sig.key).each do |ext|
+  file "permissions-#{ext}" do
+    path lazy { "/hab/cache/keys/#{keyname}#{ext}" }
+    owner 'dbuild'
   end
 end
 
