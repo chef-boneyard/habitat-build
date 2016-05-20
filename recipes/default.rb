@@ -87,16 +87,16 @@ ruby_block 'keys' do
 end
 
 file 'generated-public-key' do
-  path lazy { "/hab/studios/#{studio_slug}/hab/cache/keys/#{keyname}.pub" }
-  content lazy { IO.read("/hab/cache/keys/#{keyname}.pub") }
+  path lazy { "/hab/studios/#{studio_slug}/hab/cache/keys/#{keyname}pub" }
+  content lazy { IO.read("/hab/cache/keys/#{keyname}pub") }
   sensitive true
   owner 'dbuild'
   mode '0600'
 end
 
 file 'generated-private-key' do
-  path lazy { "/hab/studios/#{studio_slug}/hab/cache/keys/#{keyname}.sig.key" }
-  content lazy { IO.read("/hab/cache/keys/#{keyname}.sig.key") }
+  path lazy { "/hab/studios/#{studio_slug}/hab/cache/keys/#{keyname}sig.key" }
+  content lazy { IO.read("/hab/cache/keys/#{keyname}sig.key") }
   sensitive true
   owner 'dbuild'
   mode '0600'
