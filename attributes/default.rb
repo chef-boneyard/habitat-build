@@ -1,5 +1,5 @@
 # By default we use the public Habitat Depot
-default['habitat-build']['depot-url'] = 'http://willem.habitat.sh:9632'
+default['habitat-build']['depot-url'] = 'http://willem.habitat.sh:9636/v1/depot'
 
 # TODO: (jtimberman) Maybe we can discover these at some point, but it
 # really doesn't matter - these are in the depot now, and will be
