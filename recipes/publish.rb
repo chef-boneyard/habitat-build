@@ -13,24 +13,6 @@ studio_slug = [
   node['delivery']['change']['phase']
 ].join('-')
 
-# Get the plan directory from the config, or fallback to /src, set
-# this in .delivery/config.json.
-#
-# Examples:
-# {
-#   ...
-#   "habitat": {
-#     "plan_dir": "/src/plans"
-#     "plan_dir": "/elsewhere/plans/myplan"
-#   }
-# }
-plan_dir = if node['delivery']['config'].attribute?('habitat') &&
-              node['delivery']['config']['habitat'].attribute?('plan_dir')
-             node['delivery']['config']['habitat']['plan_dir']
-           else
-             '/src'
-           end
-
 artifact = nil
 artifact_hash = nil
 artifact_pkgident = nil
@@ -40,7 +22,7 @@ ruby_block 'build-plan' do
     ENV['TERM'] = 'ansi'
     command = "sudo #{::File.join('/hab/pkgs', hab_studio_pkgident, 'bin/hab-studio')}"
     command << " -r /hab/studios/#{studio_slug}"
-    command << " build #{plan_dir}"
+    command << " build #{habitat_plan_dir}"
     build = shell_out(command)
     build_output = build.stdout.split("\n")
     artifact = build_output.grep(/Artifact:/).first.split[2]
