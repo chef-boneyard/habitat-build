@@ -31,10 +31,19 @@ ruby_block 'build-plan' do
     command = "sudo #{::File.join('/hab/pkgs', hab_studio_pkgident, 'bin/hab-studio')}"
     command << " -r /hab/studios/#{studio_slug}"
     command << " build #{habitat_plan_dir}"
-    shell_out(command)
+
+    build = shell_out(command)
+
+    if build.exitstatus > 0
+      puts build.stdout
+      puts build.stderr
+      raise 'The plan.sh did NOT come together, bailing out!'
+    end
+
     last_build_env = Hash[::File.read(::File.join('/hab/studios',
                                                   studio_slug,
                                                   'src/results/last_build.env')).split(/[=\n]/)]
+
     artifact = last_build_env['pkg_artifact']
     artifact_pkgident = last_build_env['pkg_ident']
   end
