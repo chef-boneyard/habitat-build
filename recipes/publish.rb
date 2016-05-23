@@ -7,15 +7,23 @@
 hab_pkgident = node['habitat-build']['hab-pkgident']
 hab_studio_pkgident = node['habitat-build']['hab-studio-pkgident']
 
+# e.g., `sample-verify-syntax`
 studio_slug = [
   node['delivery']['change']['project'],
   node['delivery']['change']['stage'],
   node['delivery']['change']['phase']
 ].join('-')
 
+# e.g., `/hab/studios/sample-verify-syntax`
+studio_path = ::File.join('/hab/studios', studio_slug)
+
+# set local variables we're going to use in `lazy` properties later in
+# the chef run
 artifact = nil
 artifact_hash = nil
 artifact_pkgident = nil
+last_build_env = nil
+
 ruby_block 'build-plan' do
   block do
     Dir.chdir(node['delivery']['workspace']['repo'])
@@ -23,24 +31,25 @@ ruby_block 'build-plan' do
     command = "sudo #{::File.join('/hab/pkgs', hab_studio_pkgident, 'bin/hab-studio')}"
     command << " -r /hab/studios/#{studio_slug}"
     command << " build #{habitat_plan_dir}"
-    build = shell_out(command)
-    build_output = build.stdout.split("\n")
-    artifact = build_output.grep(/Artifact:/).first.split[2]
-    installed_path = build_output.grep(/Installed Path:/).first.split[3]
-    artifact_pkgident = IO.read(::File.join(::File.join('/hab/studios', studio_slug), installed_path, 'IDENT')).chomp
+    shell_out(command)
+    last_build_env = Hash[::File.read(::File.join('/hab/studios',
+                                                  studio_slug,
+                                                  'src/results/last_build.env')).split(/[=\n]/)]
+    artifact = last_build_env['pkg_artifact']
+    artifact_pkgident = last_build_env['pkg_ident']
   end
 end
 
 ruby_block 'artifact-hash' do
   block do
     command = "/hab/pkgs/#{hab_pkgident}/bin/hab"
-    command << " artifact hash #{::File.join('/hab/studios/', studio_slug, artifact)}"
+    command << " artifact hash #{::File.join(studio_path, '/src/results', artifact)}"
     artifact_hash = shell_out(command).stdout.chomp
   end
 end
 
 execute 'upload-artifact' do
-  command lazy { "#{::File.join('/hab/pkgs', hab_pkgident, 'bin/hab')} artifact upload #{::File.join('/hab/studios/', studio_slug, artifact)}" }
+  command lazy { "#{::File.join('/hab/pkgs', hab_pkgident, 'bin/hab')} artifact upload #{::File.join(studio_path, '/src/results', artifact)}" }
 end
 
 # update a data bag with the artifact build info
@@ -56,10 +65,7 @@ ruby_block 'track-artifact-data' do # ~FC014
 
     proj_data = {
       'id' => Time.now.utc.strftime('%F_%H%M'),
-      'artifact_pkgident' => artifact_pkgident,
-      'artifact_path' => artifact,
-      'artifact_checksum' => artifact_hash,
-      'artifact_type' => 'hart',
+      'artifact' => last_build_env.merge('type' => 'hart', 'hash' => artifact_hash),
       'delivery_data' => node['delivery']
     }
 
