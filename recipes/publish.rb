@@ -41,8 +41,8 @@ ruby_block 'build-plan' do
     end
 
     last_build_env = Hash[*::File.read(::File.join('/hab/studios',
-                                                  studio_slug,
-                                                  'src/results/last_build.env')).split(/[=\n]/)]
+                                                   studio_slug,
+                                                   'src/results/last_build.env')).split(/[=\n]/)]
 
     artifact = last_build_env['pkg_artifact']
     artifact_pkgident = last_build_env['pkg_ident']
