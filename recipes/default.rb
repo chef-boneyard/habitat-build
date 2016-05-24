@@ -101,7 +101,7 @@ else
 end
 
 file 'source-private-key' do
-  path lazy { "/hab/cachekeys/#{keyname}sig.key" }
+  path lazy { "/hab/cache/keys/#{keyname}sig.key" }
   content lazy { private_key }
   sensitive true
   owner 'dbuild'
@@ -109,7 +109,7 @@ file 'source-private-key' do
 end
 
 file 'source-public-key' do
-  path lazy { "/hab/cachekeys/#{keyname}pub" }
+  path lazy { "/hab/cache/keys/#{keyname}pub" }
   content lazy { public_key }
   sensitive true
   owner 'dbuild'
