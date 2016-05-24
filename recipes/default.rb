@@ -60,12 +60,12 @@ file '/etc/sudoers.d/dbuild-hab-studio' do
   content "dbuild ALL=(ALL) NOPASSWD: /hab/pkgs/#{hab_studio_pkgident}/bin/hab-studio\n"
 end
 
-execute 'remove-studio' do
+execute "remove-studio #{studio_slug}" do
   command "hab-studio -r /hab/studios/#{studio_slug} rm"
   cwd node['delivery']['workspace']['repo']
 end
 
-execute 'create-studio' do
+execute "create-studio #{studio_slug}" do
   command "hab-studio -r /hab/studios/#{studio_slug} new"
   cwd node['delivery']['workspace']['repo']
 end
@@ -74,36 +74,59 @@ directory "/hab/studios/#{studio_slug}/hab/cache/keys" do
   recursive true
 end
 
+# Attempt to load the origin key from `delivery-secrets`
 keyname = nil
-ruby_block 'origin-key-generate' do
-  block do
-    Dir.chdir(node['delivery']['workspace']['repo'])
-    command = "/hab/pkgs/#{hab_pkgident}/bin/hab"
-    command << ' origin key generate'
-    command << ' delivery'
-    key_gen = shell_out(command)
-    keyname = key_gen.stdout.split.last
+private_key = nil
+public_key = nil
+
+if habitat_secrets?
+  load_delivery_chef_config
+  key_data = get_project_secrets
+  private_key = key_data['habitat']['private_key']
+  public_key = key_data['habitat']['public_key']
+  keyname = key_data['habitat']['keyname']
+else
+  ruby_block 'origin-key-generate' do
+    block do
+      Dir.chdir(node['delivery']['workspace']['repo'])
+      command = "/hab/pkgs/#{hab_pkgident}/bin/hab"
+      command << ' origin key generate'
+      command << ' delivery'
+      key_gen = shell_out(command)
+      keyname = key_gen.stdout.gsub(/\e\[(\d+)m/, '').chomp.split.last
+      private_key = IO.read("/hab/cache/keys/#{keyname}sig.key")
+      public_key = IO.read("/hab/cache/keys/#{keyname}pub")
+    end
   end
 end
 
-%w(pub sig.key).each do |ext|
-  file "permissions-#{ext}" do
-    path lazy { "/hab/cache/keys/#{keyname}#{ext}" }
-    owner 'dbuild'
-  end
-end
-
-file 'generated-public-key' do
-  path lazy { "/hab/studios/#{studio_slug}/hab/cache/keys/#{keyname}pub" }
-  content lazy { IO.read("/hab/cache/keys/#{keyname}pub") }
+file 'source-private-key' do
+  path lazy { "/hab/cachekeys/#{keyname}sig.key" }
+  content lazy { private_key }
   sensitive true
   owner 'dbuild'
   mode '0600'
 end
 
-file 'generated-private-key' do
+file 'source-public-key' do
+  path lazy { "/hab/cachekeys/#{keyname}pub" }
+  content lazy { public_key }
+  sensitive true
+  owner 'dbuild'
+  mode '0600'
+end
+
+file 'studio-private-key' do
   path lazy { "/hab/studios/#{studio_slug}/hab/cache/keys/#{keyname}sig.key" }
   content lazy { IO.read("/hab/cache/keys/#{keyname}sig.key") }
+  sensitive true
+  owner 'dbuild'
+  mode '0600'
+end
+
+file 'origin-public-key' do
+  path lazy { "/hab/studios/#{studio_slug}/hab/cache/keys/#{keyname}pub" }
+  content lazy { IO.read("/hab/cache/keys/#{keyname}pub") }
   sensitive true
   owner 'dbuild'
   mode '0600'
