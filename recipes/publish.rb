@@ -40,7 +40,7 @@ ruby_block 'build-plan' do
       raise 'The plan.sh did NOT come together, bailing out!'
     end
 
-    last_build_env = Hash[::File.read(::File.join('/hab/studios',
+    last_build_env = Hash[*::File.read(::File.join('/hab/studios',
                                                   studio_slug,
                                                   'src/results/last_build.env')).split(/[=\n]/)]
 
