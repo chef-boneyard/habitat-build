@@ -63,6 +63,7 @@ end
 execute "remove-studio #{studio_slug}" do
   command "hab-studio -r /hab/studios/#{studio_slug} rm"
   cwd node['delivery']['workspace']['repo']
+  ignore_failure true
 end
 
 execute "create-studio #{studio_slug}" do
