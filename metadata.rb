@@ -6,6 +6,7 @@ version '0.5.10'
 
 depends 'delivery-sugar'
 depends 'delivery_build'
+depends 'delivery-truck'
 
 issues_url 'https://github.com/habitat-sh/habitat-build-cookbook/issues'
 source_url 'https://github.com/habitat-sh/habitat-build-cookbook'
