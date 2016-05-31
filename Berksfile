@@ -10,6 +10,5 @@ cookbook 'delivery-sugar',
 group :delivery do
   cookbook 'delivery_build', git: 'https://github.com/chef-cookbooks/delivery_build'
   cookbook 'delivery-base', git: 'https://github.com/chef-cookbooks/delivery-base'
-  cookbook 'delivery-truck', git: 'https://github.com/chef-cookbooks/delivery-truck'
   cookbook 'test', path: './test/fixtures/cookbooks/test'
 end

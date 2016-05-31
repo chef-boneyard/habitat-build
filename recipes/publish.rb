@@ -3,7 +3,6 @@
 # Recipe:: publish
 #
 # Copyright (c) 2016 The Authors, All Rights Reserved.
-include_recipe 'delivery-truck'
 
 hab_pkgident = node['habitat-build']['hab-pkgident']
 hab_studio_pkgident = node['habitat-build']['hab-studio-pkgident']
