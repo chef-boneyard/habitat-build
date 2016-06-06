@@ -2,12 +2,30 @@
 # Cookbook Name:: habitat-build
 # Recipe:: default
 #
+# Copyright:: Copyright (c) 2016 Chef Software Inc.
+# License:: Apache License, Version 2.0
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# At this time we assume Ubuntu 15.04+ build nodes; these packages are
+# not available on earlier Ubuntu releases.
 execute('apt-get update') { ignore_failure true }
 
 package ['xz-utils', 'shellcheck']
 
 # TODO: (jtimberman) Remove these and just use the habitat-client
 # rubygem when we publish that to rubygems.org
+# Install the gems required by the Habitat Client library in `libraries`.
 chef_gem 'rbnacl' do
   version '3.3.0'
   compile_time true
@@ -23,6 +41,10 @@ hab_static_pkgident = node['habitat-build']['hab-static-pkgident']
 hab_studio_pkgident = node['habitat-build']['hab-studio-pkgident']
 file_cache_path = Chef::Config[:file_cache_path]
 
+# For example, if the project is `surprise-sandwich`, and we're in the
+# Build stage's Publish phase, the slug will be:
+#
+#    `surprise-sandwich-build-publish`
 studio_slug = [
   node['delivery']['change']['project'],
   node['delivery']['change']['stage'],
@@ -36,6 +58,8 @@ ENV['PATH'] = [
   ENV['PATH']
 ].join(':')
 
+# We need `core/hab-static` in order to install the rest of our
+# toolchain to build the plan.
 remote_file "#{Chef::Config[:file_cache_path]}/core-hab-static.hart" do
   source "#{node['habitat-build']['depot-url']}/pkgs/#{hab_static_pkgident}/download"
 end
@@ -44,6 +68,7 @@ execute 'extract-hab-static' do
   command "tail -n +6 #{file_cache_path}/core-hab-static.hart | xzcat | tar xf - -C /"
 end
 
+# TODO: (jtimberman) We need a `habitat_package` resource.
 execute 'install-hab-studio' do
   command 'hab install core/hab-studio'
   cwd node['delivery']['workspace']['repo']
@@ -55,17 +80,21 @@ execute 'install-hab' do
 end
 
 # phases are run as the `dbuild` user, and we need to execute the
-# `hab-studio` command
+# `hab-studio` command as root because it requires privileged access
+# to bind mount the project directory in the studio.
 file '/etc/sudoers.d/dbuild-hab-studio' do
   content "dbuild ALL=(ALL) NOPASSWD: /hab/pkgs/#{hab_studio_pkgident}/bin/hab-studio\n"
 end
 
+# Before we get started, clean up from a previous build
 execute "remove-studio #{studio_slug}" do
   command "hab-studio -r /hab/studios/#{studio_slug} rm"
   cwd node['delivery']['workspace']['repo']
   ignore_failure true
 end
 
+# Create the new studio. These are lightweight until an artifact is
+# actually built.
 execute "create-studio #{studio_slug}" do
   command "hab-studio -r /hab/studios/#{studio_slug} new"
   cwd node['delivery']['workspace']['repo']
@@ -75,7 +104,11 @@ directory "/hab/studios/#{studio_slug}/hab/cache/keys" do
   recursive true
 end
 
-# Attempt to load the origin key from `delivery-secrets`
+# Attempt to load the origin key from `delivery-secrets` data bag item
+# named for this project. If it doesn't exist, we'll generate our own
+# key. Some of these variables are not available until these resources
+# are converged by chef, since generating the key will have a filename
+# based on the timestamp when it was run.
 keyname = nil
 private_key = nil
 public_key = nil
@@ -101,6 +134,10 @@ else
   end
 end
 
+# We need to have the keys permissions set correctly, and written out
+# from either the generated data bag, or the key on disk itself. The
+# latter is fine because Chef is convergent and won't change the file
+# if it doesn't need to.
 file 'source-private-key' do
   path lazy { "/hab/cache/keys/#{keyname}sig.key" }
   content lazy { private_key }
