@@ -2,145 +2,134 @@
 
 A build cookbook for running the parent project through Chef Delivery
 
-This build cookbook should be customized to suit the needs of the parent project. Using this cookbook can be done outside of Chef Delivery, too. If the parent project is a Chef cookbook, we've detected that and "wrapped" [delivery-truck](https://github.com/chef-cookbooks/delivery-truck). That means it is a dependency, and each of its pipeline phase recipes is included in the appropriate phase recipes in this cookbook. If the parent project is not a cookbook, it's left as an exercise to the reader to customize the recipes as needed for each phase in the pipeline.
+This build cookbook should be customized to suit the needs of the parent project. Do this by "wrapping" the cookbook as a dependency in your project's build cookbook.
 
-## .delivery/config.json
-
-In the parent directory to this build-cookbook, the `config.json` can be modified as necessary. For example, phases can be skipped, publishing information can be added, and so on. Refer to customer support or the Chef Delivery documentation for assistance on what options are available for this configuration.
-
-## Test Kitchen - Local Verify Testing
-
-This cookbook also has a `.kitchen.yml` which can be used to create local build nodes with Test Kitchen to perform the verification phases, `unit`, `syntax`, and `lint`. When running `kitchen converge`, the instances will be set up like Chef Delivery "build nodes" with the [delivery_build cookbook](https://github.com/chef-cookbooks/delivery_build). The reason for this is to make sure that the same exact kind of nodes are used by this build cookbook are run on the local workstation as would run Delivery. It will run `delivery job verify PHASE` for the parent project.
-
-Modify the `.kitchen.yml` if necessary to change the platforms or other configuration to run the verify phases. After making changes in the parent project, `cd` into this directory (`.delivery/build-cookbook`), and run:
-
-```
-kitchen test
-```
-
-## Recipes
-
-Each of the recipes in this build-cookbook are run in the named phase during the Chef Delivery pipeline. The `unit`, `syntax`, and `lint` recipes are additionally run when using Test Kitchen for local testing as noted in the above section.
-
-## Making Changes - Cookbook Example
-
-When making changes in the parent project (that which lives in `../..` from this directory), or in the recipes in this build cookbook, there is a bespoke workflow for Chef Delivery. As an example, we'll discuss a Chef Cookbook as the parent.
-
-First, create a new branch for the changes.
-
-```
-git checkout -b testing-build-cookbook
-```
-
-Next, increment the version in the metadata.rb. This should be in the *parent*, not in this, the build-cookbook. If this is not done, the verify phase will fail.
-
-```
-% git diff
-<SNIP>
--version '0.1.0'
-+version '0.1.1'
-```
-
-The change we'll use for an example is to install the `zsh` package. Write a failing ChefSpec in the cookbook project's `spec/unit/recipes/default_spec.rb`.
+Add to your build cookbook's metadata.rb:
 
 ```ruby
-require 'spec_helper'
+depends 'delivery-sugar'
+depends 'delivery_build'
+depends 'habitat-build'
+depends 'delivery-truck'
+```
 
-describe 'godzilla::default' do
-  context 'When all attributes are default, on an unspecified platform' do
-    let(:chef_run) do
-      runner = ChefSpec::ServerRunner.new
-      runner.converge(described_recipe)
-    end
+Add to your build cookbook's Berksfile:
 
-    it 'installs zsh' do
-      expect(chef_run).to install_package('zsh')
-    end
-  end
+```ruby
+cookbook 'delivery-sugar',
+         git: 'https://github.com/chef-cookbooks/delivery-sugar.git',
+         branch: 'master'
+
+group :delivery do
+  cookbook 'delivery_build', git: 'https://github.com/chef-cookbooks/delivery_build'
+  cookbook 'delivery-base', git: 'https://github.com/chef-cookbooks/delivery-base'
+  cookbook 'delivery-truck', git: 'https://github.com/chef-cookbooks/delivery-truck'
+  cookbook 'habitat-build', git: 'git@github.com:habitat-sh/habitat-build-cookbook'
 end
 ```
 
-Commit the local changes as work in progress. The `delivery job` expects to use a clean git repository.
+Include `habitat-build` recipes in your build cookbook's phase
+recipes. For example in your build cookbook's `lint` recipe:
 
-```
-git add ../..
-git commit -m 'WIP: Testing changes'
-```
-
-From *this* directory (`.delivery/build-cookbook`, relative to the parent cookbook project), run
-
-```
-cd .delivery/build-cookbook
-kitchen converge
+```ruby
+include_recipe 'habitat-build::lint'
 ```
 
-This will take some time at first, because the VMs need to be created, Chef installed, the Delivery CLI installed, etc. Later runs will be faster until they are destroyed. It will also fail on the first VM, as expected, because we wrote the test first. Now edit the parent cookbook project's default recipe to install `zsh`.
+Your project must have a `./habitat` directory that contains the `plan.sh` file and other files as necessary for your project to be packaged by Habitat - for example `default.toml`, or the run script.
 
-```
-cd ../../
-$EDITOR/recipes/default.rb
-```
+## Attributes
 
-It should look like this:
+`node['habitat-build']['depot-url']` URL to the Habitat Depot where packages are published.
 
-```
-package 'zsh'
-```
+`node['habitat-build']['hab-pkgident']` Package identifier for the `core/hab` package.
 
-Create another commit.
+`node['habitat-build']['hab-static-pkgident']` Package identifier for the `core/hab-static` package.
 
-```
-git add .
-git commit -m 'WIP: Install zsh in default recipe'
-```
+`node['habitat-build']['hab-studio-pkgident']` Package identifier for the `core/hab-studio` package.
 
-Now rerun kitchen from the build-cookbook.
+`node['habitat-build']['shellcheck-excludes']` `Array` of ShellCheck codes to [ignore](https://github.com/koalaman/shellcheck/wiki/Ignore).
 
-```
-cd .delivery/build-cookbook
-kitchen converge
-```
+## Recipes
 
-This will take awhile because it will now pass on the first VM, and then create the second VM. We should have warned you this was a good time for a coffee break.
+### default
 
-```
-Recipe: test::default
+Sets up a Chef Delivery build node so that it can build Habitat packages in a Studio.
 
-- execute HOME=/home/vagrant delivery job verify unit --server localhost --ent test --org kitchen
-  * execute[HOME=/home/vagrant delivery job verify lint --server localhost --ent test --org kitchen] action run
-    - execute HOME=/home/vagrant delivery job verify lint --server localhost --ent test --org kitchen
+### deploy
 
-    - execute HOME=/home/vagrant delivery job verify syntax --server localhost --ent test --org kitchen
+Does nothing in this cookbook.
 
-Running handlers:
-Running handlers complete
-Chef Client finished, 3/32 resources updated in 54.665445968 seconds
-Finished converging <default-centos-71> (1m26.83s).
-```
+### functional
 
-Victory is ours! Our verify phase passed on the build nodes.
+Does nothing in this cookbook.
 
-We are ready to run this through our Delivery pipeline. Simply run `delivery review` on the local system from the parent project, and it will open a browser window up to the change we just added.
+### lint
 
-```
-cd ../..
-delivery review
-```
+Performs a [lint check](https://en.wikipedia.org/wiki/Lint_(software) against the `habitat/plan.sh` using the [ShellCheck](https://www.shellcheck.net/) static analysis tool. Specific codes can be ignored by ShellCheck by adding them to the node attribute array, `node['habitat-build']['shellcheck-excludes']`.
 
-## FAQ
+**Note**: This attribute will become a Delivery `config.json` option.
 
-### Why don't I just run rspec, foodcritic/rubocop, knife cookbook test on my local system?
+### provision
 
-An objection to the Test Kitchen approach is that it is much faster to run the unit, lint, and syntax commands for the project on the local system. That is totally true, and also totally valid. Do that for the really fast feedback loop. However, the dance we do with Test Kitchen brings a much higher degree of confidence in the changes we're making, that everything will run on the build nodes in Chef Delivery. We strongly encourage this approach before actually pushing the changes to Delivery.
+This recipe loads the information from the data bag generated in the `publish` phase and uses that to promote the artifact the current Delivery stage in Acceptance, Union, Rehearsal, and Delivered stages. It will then be available from the depot for that view in other phases in the stage.
 
-### Why do I have to make a commit every time?
+### publish
 
-When running `delivery job`, it expects to merge the commit for the changeset against the clean master branch. If we don't save our progress by making a commit, our local changes aren't run through `delivery job` in the Test Kitchen build instances. We can always perform an interactive rebase, and modify the original changeset message in Delivery with `delivery review --edit`. The latter won't modify the git commits, only the changeset in Delivery.
+This recipe builds the package with Habitat and publishes it to the configured Habitat Depot (by default, the public Habitat Depot). Change the `node['habitat-build']['depot-url']` to an internal depot if necessary. Once the build is complete, this recipe uses the `/src/results/last_build.env` file for information about the package that was built. It uses `hab artifact hash` to generate the hash checksum for the package. The information gathered is stored in a data bag, named after the Delivery `project_slug`, which is generated as `enterprise-organization-project` by Delivery. The item itself will have a timestamp name like `2016-06-01_1643`.
 
-### What do I do next?
+This data bag item is used in the `provision` recipe to track state changes of the build through the pipeline, as each phase is a separate Chef Client run on the build node.
 
-Make changes in the cookbook project as required for organizational goals and needs. Modify the `build-cookbook` as necessary for the pipeline phases that the cookbook should go through.
+### quality
 
-### What if I get stuck?
+Does nothing in this cookbook.
 
-Contact Chef Support, or your Chef Customer Success team and they will help you get unstuck.
+### security
+
+Does nothing in this cookbook.
+
+### smoke
+
+Does nothing in this cookbook.
+
+### syntax
+
+Performs a `bash` syntax check using `bash -n` against the `habitat/plan.sh`.
+
+### unit
+
+Does nothing in this cookbook.
+
+## Libraries
+
+### client
+
+The `habitat-client` Ruby library. This is in the cookbook because we cannot publish it as a RubyGem until we release Habitat to the world. See rdoc comments in `libraries/client.rb` for more information.
+
+### exceptions
+
+Custom exception handlers for `habitat-client`.
+
+### helpers
+
+Cookbook recipe helper methods.
+
+`habitat_plan_dir`: returns the directory where the plan lives. Searches the `delivery/config.json` of the build cookbook configuration, followed by an attribute, and falls back to `/src/habitat`.
+
+`habitat_secrets?`: predicate method that returns `true` if there's a data bag item for the project's secrets in Chef Delivery, and if it has non-empty origin secrets in a hash key `habitat`, `keyname`, `private_key`, and `public_key`.
+
+## License and Author
+
+- Author: Joshua Timberman <joshua@chef.io>
+- Copyright (C) 2014-2015 Chef Software, Inc. <legal@chef.io>
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
