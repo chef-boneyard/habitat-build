@@ -24,7 +24,6 @@ execute('apt-get update') { ignore_failure true }
 package ['xz-utils', 'shellcheck']
 
 hab_pkgident = node['habitat-build']['hab-pkgident']
-hab_static_pkgident = node['habitat-build']['hab-static-pkgident']
 hab_studio_pkgident = node['habitat-build']['hab-studio-pkgident']
 file_cache_path = Chef::Config[:file_cache_path]
 
@@ -40,30 +39,16 @@ studio_slug = [
 
 ENV['PATH'] = [
   "/hab/pkgs/#{hab_pkgident}/bin",
-  "/hab/pkgs/#{hab_static_pkgident}/bin",
   "/hab/pkgs/#{hab_studio_pkgident}/bin",
   ENV['PATH']
 ].join(':')
 
-# We need `core/hab-static` in order to install the rest of our
-# toolchain to build the plan.
-remote_file "#{Chef::Config[:file_cache_path]}/core-hab-static.hart" do
-  source "#{node['habitat-build']['depot-url']}/pkgs/#{hab_static_pkgident}/download"
+remote_file "#{Chef::Config[:file_cache_path]}/core-hab.hart" do
+  source "#{node['habitat-build']['depot-url']}/pkgs/#{hab_pkgident}/download"
 end
 
-execute 'extract-hab-static' do
-  command "tail -n +6 #{file_cache_path}/core-hab-static.hart | xzcat | tar xf - -C /"
-end
-
-# TODO: (jtimberman) We need a `habitat_package` resource.
-execute 'install-hab-studio' do
-  command 'hab install core/hab-studio'
-  cwd node['delivery']['workspace']['repo']
-end
-
-execute 'install-hab' do
-  command 'hab install core/hab'
-  cwd node['delivery']['workspace']['repo']
+execute 'extract-hab' do
+  command "tail -n +6 #{file_cache_path}/core-hab.hart | xzcat | tar xf - -C /"
 end
 
 # phases are run as the `dbuild` user, and we need to execute the
