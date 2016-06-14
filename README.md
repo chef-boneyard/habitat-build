@@ -43,8 +43,6 @@ Your project must have a `./habitat` directory that contains the `plan.sh` file 
 
 `node['habitat-build']['hab-pkgident']` Package identifier for the `core/hab` package.
 
-`node['habitat-build']['hab-static-pkgident']` Package identifier for the `core/hab-static` package.
-
 `node['habitat-build']['hab-studio-pkgident']` Package identifier for the `core/hab-studio` package.
 
 `node['habitat-build']['shellcheck-excludes']` `Array` of ShellCheck codes to [ignore](https://github.com/koalaman/shellcheck/wiki/Ignore).

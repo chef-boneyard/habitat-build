@@ -17,15 +17,14 @@
 # By default we use the public Habitat Depot
 #
 # TODO: (jtimberman) Configure this from a Delivery `config.json`.
-default['habitat-build']['depot-url'] = 'http://willem.habitat.sh:9636/v1/depot'
+default['habitat-build']['depot-url'] = 'https://willem.habitat.sh/v1/depot'
 
 # TODO: (jtimberman) Maybe we can discover these at some point, but it
 # really doesn't matter - these are in the depot now, and will be
 # available forevermore. Until they're not. And then we'll update
 # these attributes.
-default['habitat-build']['hab-pkgident'] = 'core/hab/0.6.0/20160604180832'
-default['habitat-build']['hab-static-pkgident'] = 'core/hab-static/0.6.0/20160604180457'
-default['habitat-build']['hab-studio-pkgident'] = 'core/hab-studio/0.6.0/20160604180820'
+default['habitat-build']['hab-pkgident'] = 'core/hab/0.6.0/20160613074414'
+default['habitat-build']['hab-studio-pkgident'] = 'core/hab-studio/0.6.0/20160613075329'
 
 # An array of codes to ignore in shellcheck (lint checker). By default
 # we exclude:
