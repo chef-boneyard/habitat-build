@@ -23,19 +23,6 @@ execute('apt-get update') { ignore_failure true }
 
 package ['xz-utils', 'shellcheck']
 
-# TODO: (jtimberman) Remove these and just use the habitat-client
-# rubygem when we publish that to rubygems.org
-# Install the gems required by the Habitat Client library in `libraries`.
-chef_gem 'rbnacl' do
-  version '3.3.0'
-  compile_time true
-end
-
-chef_gem 'faraday' do
-  version '0.9.2'
-  compile_time true
-end
-
 hab_pkgident = node['habitat-build']['hab-pkgident']
 hab_static_pkgident = node['habitat-build']['hab-static-pkgident']
 hab_studio_pkgident = node['habitat-build']['hab-studio-pkgident']
