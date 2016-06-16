@@ -52,15 +52,15 @@ execute 'extract-hab' do
 end
 
 # phases are run as the `dbuild` user, and we need to execute the
-# `hab-studio` command as root because it requires privileged access
+# `hab studio` command as root because it requires privileged access
 # to bind mount the project directory in the studio.
 file '/etc/sudoers.d/dbuild-hab-studio' do
-  content "dbuild ALL=(ALL) NOPASSWD: /hab/pkgs/#{hab_studio_pkgident}/bin/hab-studio\n"
+  content "dbuild ALL=(ALL) NOPASSWD: /hab/pkgs/#{hab_studio_pkgident}/bin/hab studio\n"
 end
 
 # Before we get started, clean up from a previous build
 execute "remove-studio #{studio_slug}" do
-  command "hab-studio -r /hab/studios/#{studio_slug} rm"
+  command "hab studio -r /hab/studios/#{studio_slug} rm"
   cwd node['delivery']['workspace']['repo']
   ignore_failure true
 end
@@ -68,7 +68,7 @@ end
 # Create the new studio. These are lightweight until an artifact is
 # actually built.
 execute "create-studio #{studio_slug}" do
-  command "hab-studio -r /hab/studios/#{studio_slug} new"
+  command "hab studio -r /hab/studios/#{studio_slug} new"
   cwd node['delivery']['workspace']['repo']
 end
 
