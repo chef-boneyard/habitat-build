@@ -21,6 +21,10 @@
 hab_pkgident = node['habitat-build']['hab-pkgident']
 hab_studio_pkgident = node['habitat-build']['hab-studio-pkgident']
 
+project_secrets = get_project_secrets
+depot_token = project_secrets['habitat']['depot_token']
+keyname = project_secrets['habitat']['keyname']
+
 # e.g., `sample-verify-syntax`
 studio_slug = [
   node['delivery']['change']['project'],
@@ -44,6 +48,8 @@ ruby_block 'build-plan' do
     ENV['TERM'] = 'ansi'
     command = "sudo #{::File.join('/hab/pkgs', hab_studio_pkgident, 'bin/hab-studio')}"
     command << " -r /hab/studios/#{studio_slug}"
+    # the `-k` option gets cranky unless you drop the revision timestamp from the keyname
+    command << " -k #{keyname.split('-')[0...-1].join('-')}"
     command << " build #{habitat_plan_dir}"
 
     build = shell_out(command)
@@ -70,9 +76,6 @@ ruby_block 'artifact-hash' do
     artifact_hash = shell_out(command).stdout.chomp
   end
 end
-
-project_secrets = get_project_secrets
-depot_token = project_secrets['habitat']['depot_token']
 
 execute 'upload-artifact' do
   command lazy { "#{::File.join('/hab/pkgs', hab_pkgident, 'bin/hab')} artifact upload --url #{node['habitat-build']['depot-url']} --auth '#{depot_token}' #{::File.join(studio_path, '/src/results', artifact)}" }
