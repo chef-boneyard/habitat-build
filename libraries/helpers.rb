@@ -47,7 +47,7 @@ def habitat_secrets?
   end
 
   return false unless key_data.key?('habitat') && !key_data['habitat'].empty?
-  %w(keyname private_key public_key).each do |req_key|
+  %w(keyname private_key public_key depot_token).each do |req_key|
     if key_data['habitat'].key?(req_key) && !key_data['habitat'][req_key].empty?
       next
     else
