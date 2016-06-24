@@ -16,16 +16,16 @@ depends 'delivery-truck'
 Add to your build cookbook's Berksfile:
 
 ```ruby
-cookbook 'delivery-sugar',
-         git: 'https://github.com/chef-cookbooks/delivery-sugar.git',
-         branch: 'master'
+source "https://supermarket.chef.io"
 
-group :delivery do
-  cookbook 'delivery_build', git: 'https://github.com/chef-cookbooks/delivery_build'
-  cookbook 'delivery-base', git: 'https://github.com/chef-cookbooks/delivery-base'
-  cookbook 'delivery-truck', git: 'https://github.com/chef-cookbooks/delivery-truck'
-  cookbook 'habitat-build', git: 'git@github.com:habitat-sh/habitat-build-cookbook'
-end
+metadata
+
+cookbook 'delivery-truck'
+
+cookbook 'delivery-base',  git: 'https://github.com/chef-cookbooks/delivery-base.git'
+cookbook 'delivery_build', git: 'https://github.com/chef-cookbooks/delivery_build.git'
+cookbook 'delivery-sugar', git: 'https://github.com/chef-cookbooks/delivery-sugar.git'
+cookbook 'habitat-build',  git: 'https://github.com/chef-cookbooks/habitat-build.git'
 ```
 
 Include `habitat-build` recipes in your build cookbook's phase
