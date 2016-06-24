@@ -99,9 +99,9 @@ else
       command << ' origin key generate'
       command << ' delivery'
       key_gen = shell_out(command)
-      keyname = key_gen.stdout.gsub(/\e\[(\d+)m/, '').chomp.split.last
-      private_key = IO.read("/hab/cache/keys/#{keyname}sig.key")
-      public_key = IO.read("/hab/cache/keys/#{keyname}pub")
+      keyname = key_gen.stdout.gsub(/\e\[(\d+)m/, '').chomp.split.last.chop
+      private_key = IO.read("/hab/cache/keys/#{keyname}.sig.key")
+      public_key = IO.read("/hab/cache/keys/#{keyname}.pub")
     end
   end
 end
@@ -111,7 +111,7 @@ end
 # latter is fine because Chef is convergent and won't change the file
 # if it doesn't need to.
 file 'source-private-key' do
-  path lazy { "/hab/cache/keys/#{keyname}sig.key" }
+  path lazy { "/hab/cache/keys/#{keyname}.sig.key" }
   content lazy { private_key }
   sensitive true
   owner 'dbuild'
@@ -119,7 +119,7 @@ file 'source-private-key' do
 end
 
 file 'source-public-key' do
-  path lazy { "/hab/cache/keys/#{keyname}pub" }
+  path lazy { "/hab/cache/keys/#{keyname}.pub" }
   content lazy { public_key }
   sensitive true
   owner 'dbuild'
@@ -127,16 +127,16 @@ file 'source-public-key' do
 end
 
 file 'studio-private-key' do
-  path lazy { "/hab/studios/#{studio_slug}/hab/cache/keys/#{keyname}sig.key" }
-  content lazy { IO.read("/hab/cache/keys/#{keyname}sig.key") }
+  path lazy { "/hab/studios/#{studio_slug}/hab/cache/keys/#{keyname}.sig.key" }
+  content lazy { IO.read("/hab/cache/keys/#{keyname}.sig.key") }
   sensitive true
   owner 'dbuild'
   mode '0600'
 end
 
 file 'origin-public-key' do
-  path lazy { "/hab/studios/#{studio_slug}/hab/cache/keys/#{keyname}pub" }
-  content lazy { IO.read("/hab/cache/keys/#{keyname}pub") }
+  path lazy { "/hab/studios/#{studio_slug}/hab/cache/keys/#{keyname}.pub" }
+  content lazy { IO.read("/hab/cache/keys/#{keyname}.pub") }
   sensitive true
   owner 'dbuild'
   mode '0600'
