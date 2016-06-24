@@ -125,19 +125,3 @@ file 'source-public-key' do
   owner 'dbuild'
   mode '0600'
 end
-
-file 'studio-private-key' do
-  path lazy { "/hab/studios/#{studio_slug}/hab/cache/keys/#{keyname}.sig.key" }
-  content lazy { IO.read("/hab/cache/keys/#{keyname}.sig.key") }
-  sensitive true
-  owner 'dbuild'
-  mode '0600'
-end
-
-file 'origin-public-key' do
-  path lazy { "/hab/studios/#{studio_slug}/hab/cache/keys/#{keyname}.pub" }
-  content lazy { IO.read("/hab/cache/keys/#{keyname}.pub") }
-  sensitive true
-  owner 'dbuild'
-  mode '0600'
-end
