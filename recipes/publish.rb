@@ -71,8 +71,11 @@ ruby_block 'artifact-hash' do
   end
 end
 
+project_secrets = get_project_secrets
+depot_token = project_secrets['habitat']['depot_token']
+
 execute 'upload-artifact' do
-  command lazy { "#{::File.join('/hab/pkgs', hab_pkgident, 'bin/hab')} artifact upload #{::File.join(studio_path, '/src/results', artifact)}" }
+  command lazy { "#{::File.join('/hab/pkgs', hab_pkgident, 'bin/hab')} artifact upload --url #{node['habitat-build']['depot-url']} --auth '#{depot_token}' #{::File.join(studio_path, '/src/results', artifact)}" }
 end
 
 # update a data bag with the artifact build info
