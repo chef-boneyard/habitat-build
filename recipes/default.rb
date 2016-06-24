@@ -55,7 +55,7 @@ end
 # `hab studio` command as root because it requires privileged access
 # to bind mount the project directory in the studio.
 file '/etc/sudoers.d/dbuild-hab-studio' do
-  content "dbuild ALL=(ALL) NOPASSWD: /hab/pkgs/#{hab_studio_pkgident}/bin/hab studio\n"
+  content "dbuild ALL=(ALL) NOPASSWD: /hab/pkgs/#{hab_studio_pkgident}/bin/hab-studio\n"
 end
 
 # Before we get started, clean up from a previous build
