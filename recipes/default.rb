@@ -49,7 +49,7 @@ keyname = nil
 private_key = nil
 public_key = nil
 
-if habitat_secrets?
+if habitat_origin_key?
   load_delivery_chef_config
   key_data = get_project_secrets
   private_key = key_data['habitat']['private_key']

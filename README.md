@@ -113,7 +113,9 @@ Cookbook recipe helper methods.
 
 `habitat_plan_dir`: returns the directory where the plan lives. Searches the `delivery/config.json` of the build cookbook configuration, followed by an attribute, and falls back to `/src/habitat`.
 
-`habitat_secrets?`: predicate method that returns `true` if there's a data bag item for the project's secrets in Chef Delivery, and if it has non-empty origin secrets in a hash key `habitat`, `keyname`, `private_key`, `public_key`, and `depot_token`.
+`habitat_origin_key?`: predicate method that returns `true` if there's a data bag item for the project's secrets in Chef Delivery, and if it has non-empty origin secrets in a hash key `habitat`, `keyname`, `private_key`, `public_key`.
+
+`habitat_depot_token?`: predicate method that returns `true` if there's a data bag item for the project's secrets in Chef Delivery, and if it has non-empty origin secrets in a hash key `habitat`, `depot_token`.
 
 ## License and Author
 
