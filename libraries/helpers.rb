@@ -35,27 +35,12 @@ def habitat_plan_dir
   end
 end
 
-# if we're going to load secrets, we need to make sure we actually
-# have the data!
-def habitat_secrets?
-  load_delivery_chef_config
+def habitat_origin_key?
+  project_secrets_exist?(%w(keyname private_key public_key))
+end
 
-  begin
-    key_data = get_project_secrets.to_hash
-  rescue Net::HTTPServerException
-    return false
-  end
-
-  return false unless key_data.key?('habitat') && !key_data['habitat'].empty?
-  %w(keyname private_key public_key depot_token).each do |req_key|
-    if key_data['habitat'].key?(req_key) && !key_data['habitat'][req_key].empty?
-      next
-    else
-      return false
-    end
-  end
-
-  true
+def habitat_depot_token?
+  project_secrets_exist?(%w(depot_token))
 end
 
 def hab_binary
@@ -81,4 +66,29 @@ end
 
 def hab_studio_path
   File.join('/hab/studios', hab_studio_slug)
+end
+
+private
+
+# if we're going to load secrets, we need to make sure we actually
+# have the data!
+def project_secrets_exist?(secret_keys = [])
+  load_delivery_chef_config
+
+  begin
+    key_data = get_project_secrets.to_hash
+  rescue Net::HTTPServerException
+    return false
+  end
+
+  return false unless key_data.key?('habitat') && !key_data['habitat'].empty?
+  secret_keys.each do |req_key|
+    if key_data['habitat'].key?(req_key) && !key_data['habitat'][req_key].empty?
+      next
+    else
+      return false
+    end
+  end
+
+  true
 end
