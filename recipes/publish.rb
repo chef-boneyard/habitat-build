@@ -40,6 +40,7 @@ build #{habitat_plan_dir}
     'TERM' => 'ansi'
   )
   cwd node['delivery']['workspace']['repo']
+  live_stream true
 end
 
 ruby_block 'load-build-output' do
@@ -62,6 +63,7 @@ end
 
 execute 'upload-pkg' do
   command lazy { "#{hab_binary} pkg upload --url #{node['habitat-build']['depot-url']} --auth '#{depot_token}' #{::File.join(hab_studio_path, '/src/results', artifact)}" }
+  live_stream true
 end
 
 # update a data bag with the artifact build info
