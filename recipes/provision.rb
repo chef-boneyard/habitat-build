@@ -21,9 +21,10 @@
 # Take advantage of delivery-truck's built in version pinning and promotion
 include 'delivery-truck::provision'
 
-ruby_block 'promote-artifact' do
-  block do
-    hc = Habitat::Client.new
-    hc.promote_package(artifact_data['artifact']['pkg_ident'], node['delivery']['change']['stage'])
-  end
-end
+# TODO: re-enable this when `Habitat::Client` supports Depots that require authn
+# ruby_block 'promote-artifact' do
+#   block do
+#     hc = Habitat::Client.new
+#     hc.promote_package(artifact_data['artifact']['pkg_ident'], node['delivery']['change']['stage'])
+#   end
+# end
