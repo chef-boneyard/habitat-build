@@ -21,9 +21,6 @@ source "https://supermarket.chef.io"
 metadata
 
 cookbook 'delivery-truck'
-
-cookbook 'delivery-base',  git: 'https://github.com/chef-cookbooks/delivery-base.git'
-cookbook 'delivery_build', git: 'https://github.com/chef-cookbooks/delivery_build.git'
 cookbook 'delivery-sugar', git: 'https://github.com/chef-cookbooks/delivery-sugar.git'
 cookbook 'habitat-build',  git: 'https://github.com/chef-cookbooks/habitat-build.git'
 ```
