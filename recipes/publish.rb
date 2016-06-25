@@ -42,24 +42,21 @@ artifact_hash = nil
 artifact_pkgident = nil
 last_build_env = nil
 
-ruby_block 'build-plan' do
+execute 'build-plan' do
+  command <<-EOH
+sudo #{::File.join('/hab/pkgs', hab_studio_pkgident, 'bin/hab-studio')} \
+-r /hab/studios/#{studio_slug} \
+-k #{keyname.split('-')[0...-1].join('-')} \
+build #{habitat_plan_dir}
+  EOH
+  env(
+    'TERM' => 'ansi'
+  )
+  cwd node['delivery']['workspace']['repo']
+end
+
+ruby_block 'load-build-output' do
   block do
-    Dir.chdir(node['delivery']['workspace']['repo'])
-    ENV['TERM'] = 'ansi'
-    command = "sudo #{::File.join('/hab/pkgs', hab_studio_pkgident, 'bin/hab-studio')}"
-    command << " -r /hab/studios/#{studio_slug}"
-    # the `-k` option gets cranky unless you drop the revision timestamp from the keyname
-    command << " -k #{keyname.split('-')[0...-1].join('-')}"
-    command << " build #{habitat_plan_dir}"
-
-    build = shell_out(command)
-
-    if build.exitstatus > 0
-      puts build.stdout
-      puts build.stderr
-      raise 'The plan.sh did NOT come together, bailing out!'
-    end
-
     last_build_env = Hash[*::File.read(::File.join('/hab/studios',
                                                    studio_slug,
                                                    'src/results/last_build.env')).split(/[=\n]/)]
