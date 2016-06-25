@@ -17,10 +17,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
 project_secrets = get_project_secrets
-depot_token = project_secrets['habitat']['depot_token']
-keyname = project_secrets['habitat']['keyname']
+origin = 'delivery'
+
+if habitat_origin_key?
+  keyname = project_secrets['habitat']['keyname']
+  origin = keyname.split('-')[0...-1].join('-')
+end
 
 # set local variables we're going to use in `lazy` properties later in
 # the chef run
@@ -30,12 +33,10 @@ artifact_pkgident = nil
 last_build_env = nil
 
 execute 'build-plan' do
-  command <<-EOH
-sudo #{hab_studio_binary} \
--r #{hab_studio_path} \
--k #{keyname.split('-')[0...-1].join('-')} \
-build #{habitat_plan_dir}
-  EOH
+  command "sudo #{hab_studio_binary}" \
+          " -r #{hab_studio_path}" \
+          " -k #{origin}" \
+          " build #{habitat_plan_dir}"
   env(
     'TERM' => 'ansi'
   )
@@ -61,9 +62,21 @@ ruby_block 'generate-pkg-hash' do
   end
 end
 
-execute 'upload-pkg' do
-  command lazy { "#{hab_binary} pkg upload --url #{node['habitat-build']['depot-url']} --auth '#{depot_token}' #{::File.join(hab_studio_path, '/src/results', artifact)}" }
-  live_stream true
+if habitat_depot_token?
+  depot_token = project_secrets['habitat']['depot_token']
+
+  execute 'upload-pkg' do
+    command lazy {
+      "#{hab_binary} pkg upload" \
+      " --url #{node['habitat-build']['depot-url']}" \
+      " #{hab_studio_path}/src/results/#{artifact}"
+    }
+    env(
+      'HAB_AUTH_TOKEN' => depot_token
+    )
+    live_stream true
+    sensitive true
+  end
 end
 
 # update a data bag with the artifact build info
