@@ -58,24 +58,6 @@ file '/etc/sudoers.d/dbuild-hab-studio' do
   content "dbuild ALL=(ALL) NOPASSWD: /hab/pkgs/#{hab_studio_pkgident}/bin/hab-studio\n"
 end
 
-# Before we get started, clean up from a previous build
-execute "remove-studio #{studio_slug}" do
-  command "hab studio -r /hab/studios/#{studio_slug} rm"
-  cwd node['delivery']['workspace']['repo']
-  ignore_failure true
-end
-
-# Create the new studio. These are lightweight until an artifact is
-# actually built.
-execute "create-studio #{studio_slug}" do
-  command "hab studio -r /hab/studios/#{studio_slug} new"
-  cwd node['delivery']['workspace']['repo']
-end
-
-directory "/hab/studios/#{studio_slug}/hab/cache/keys" do
-  recursive true
-end
-
 # Attempt to load the origin key from `delivery-secrets` data bag item
 # named for this project. If it doesn't exist, we'll generate our own
 # key. Some of these variables are not available until these resources
