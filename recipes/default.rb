@@ -23,28 +23,10 @@ execute('apt-get update') { ignore_failure true }
 
 package ['xz-utils', 'shellcheck']
 
-hab_pkgident = node['habitat-build']['hab-pkgident']
-hab_studio_pkgident = node['habitat-build']['hab-studio-pkgident']
 file_cache_path = Chef::Config[:file_cache_path]
 
-# For example, if the project is `surprise-sandwich`, and we're in the
-# Build stage's Publish phase, the slug will be:
-#
-#    `surprise-sandwich-build-publish`
-studio_slug = [
-  node['delivery']['change']['project'],
-  node['delivery']['change']['stage'],
-  node['delivery']['change']['phase']
-].join('-')
-
-ENV['PATH'] = [
-  "/hab/pkgs/#{hab_pkgident}/bin",
-  "/hab/pkgs/#{hab_studio_pkgident}/bin",
-  ENV['PATH']
-].join(':')
-
-remote_file "#{Chef::Config[:file_cache_path]}/core-hab.hart" do
-  source "#{node['habitat-build']['depot-url']}/pkgs/#{hab_pkgident}/download"
+remote_file "#{file_cache_path}/core-hab.hart" do
+  source "#{node['habitat-build']['depot-url']}/pkgs/#{node['habitat-build']['hab-pkgident']}/download"
 end
 
 execute 'extract-hab' do
@@ -55,7 +37,7 @@ end
 # `hab studio` command as root because it requires privileged access
 # to bind mount the project directory in the studio.
 file '/etc/sudoers.d/dbuild-hab-studio' do
-  content "dbuild ALL=(ALL) NOPASSWD: /hab/pkgs/#{hab_studio_pkgident}/bin/hab-studio\n"
+  content "dbuild ALL=(ALL) NOPASSWD: /hab/pkgs/#{node['habitat-build']['hab-studio-pkgident']}/bin/hab-studio\n"
 end
 
 # Attempt to load the origin key from `delivery-secrets` data bag item
@@ -77,7 +59,7 @@ else
   ruby_block 'origin-key-generate' do
     block do
       Dir.chdir(node['delivery']['workspace']['repo'])
-      command = "/hab/pkgs/#{hab_pkgident}/bin/hab"
+      command = hab_binary
       command << ' origin key generate'
       command << ' delivery'
       key_gen = shell_out(command)
