@@ -5,7 +5,7 @@ license 'apache2'
 version '0.7.1'
 
 depends 'delivery-sugar'
-depends 'delivery_build'
+depends 'delivery-truck'
 
 gem 'habitat-client'
 
