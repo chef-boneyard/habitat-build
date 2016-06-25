@@ -18,22 +18,9 @@
 # limitations under the License.
 #
 
-hab_pkgident = node['habitat-build']['hab-pkgident']
-hab_studio_pkgident = node['habitat-build']['hab-studio-pkgident']
-
 project_secrets = get_project_secrets
 depot_token = project_secrets['habitat']['depot_token']
 keyname = project_secrets['habitat']['keyname']
-
-# e.g., `sample-verify-syntax`
-studio_slug = [
-  node['delivery']['change']['project'],
-  node['delivery']['change']['stage'],
-  node['delivery']['change']['phase']
-].join('-')
-
-# e.g., `/hab/studios/sample-verify-syntax`
-studio_path = ::File.join('/hab/studios', studio_slug)
 
 # set local variables we're going to use in `lazy` properties later in
 # the chef run
@@ -44,8 +31,8 @@ last_build_env = nil
 
 execute 'build-plan' do
   command <<-EOH
-sudo #{::File.join('/hab/pkgs', hab_studio_pkgident, 'bin/hab-studio')} \
--r /hab/studios/#{studio_slug} \
+sudo #{hab_studio_binary} \
+-r #{hab_studio_path} \
 -k #{keyname.split('-')[0...-1].join('-')} \
 build #{habitat_plan_dir}
   EOH
@@ -57,8 +44,7 @@ end
 
 ruby_block 'load-build-output' do
   block do
-    last_build_env = Hash[*::File.read(::File.join('/hab/studios',
-                                                   studio_slug,
+    last_build_env = Hash[*::File.read(::File.join(hab_studio_path,
                                                    'src/results/last_build.env')).split(/[=\n]/)]
 
     artifact = last_build_env['pkg_artifact']
@@ -68,14 +54,14 @@ end
 
 ruby_block 'generate-pkg-hash' do
   block do
-    command = "/hab/pkgs/#{hab_pkgident}/bin/hab"
-    command << " pkg hash #{::File.join(studio_path, '/src/results', artifact)}"
+    command = hab_binary
+    command << " pkg hash #{::File.join(hab_studio_path, '/src/results', artifact)}"
     artifact_hash = shell_out(command).stdout.chomp
   end
 end
 
 execute 'upload-pkg' do
-  command lazy { "#{::File.join('/hab/pkgs', hab_pkgident, 'bin/hab')} pkg upload --url #{node['habitat-build']['depot-url']} --auth '#{depot_token}' #{::File.join(studio_path, '/src/results', artifact)}" }
+  command lazy { "#{hab_binary} pkg upload --url #{node['habitat-build']['depot-url']} --auth '#{depot_token}' #{::File.join(hab_studio_path, '/src/results', artifact)}" }
 end
 
 # update a data bag with the artifact build info

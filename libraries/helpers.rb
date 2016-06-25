@@ -57,3 +57,28 @@ def habitat_secrets?
 
   true
 end
+
+def hab_binary
+  File.join('/hab/pkgs', node['habitat-build']['hab-pkgident'], 'bin/hab')
+end
+
+def hab_studio_binary
+  File.join('/hab/pkgs', node['habitat-build']['hab-studio-pkgident'], 'bin/hab-studio')
+end
+
+# For example, if the project is `surprise-sandwich`, and we're in the
+# Build stage's Publish phase, the slug will be:
+#
+#    `surprise-sandwich-build-publish`
+#
+def hab_studio_slug
+  [
+    node['delivery']['change']['project'],
+    node['delivery']['change']['stage'],
+    node['delivery']['change']['phase']
+  ].join('-')
+end
+
+def hab_studio_path
+  File.join('/hab/studios', hab_studio_slug)
+end
