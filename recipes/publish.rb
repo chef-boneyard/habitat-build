@@ -69,16 +69,16 @@ ruby_block 'build-plan' do
   end
 end
 
-ruby_block 'artifact-hash' do
+ruby_block 'generate-pkg-hash' do
   block do
     command = "/hab/pkgs/#{hab_pkgident}/bin/hab"
-    command << " artifact hash #{::File.join(studio_path, '/src/results', artifact)}"
+    command << " pkg hash #{::File.join(studio_path, '/src/results', artifact)}"
     artifact_hash = shell_out(command).stdout.chomp
   end
 end
 
-execute 'upload-artifact' do
-  command lazy { "#{::File.join('/hab/pkgs', hab_pkgident, 'bin/hab')} artifact upload --url #{node['habitat-build']['depot-url']} --auth '#{depot_token}' #{::File.join(studio_path, '/src/results', artifact)}" }
+execute 'upload-pkg' do
+  command lazy { "#{::File.join('/hab/pkgs', hab_pkgident, 'bin/hab')} pkg upload --url #{node['habitat-build']['depot-url']} --auth '#{depot_token}' #{::File.join(studio_path, '/src/results', artifact)}" }
 end
 
 # update a data bag with the artifact build info
