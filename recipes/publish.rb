@@ -17,63 +17,63 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+project_secrets = get_project_secrets
+origin = 'delivery'
 
-hab_pkgident = node['habitat-build']['hab-pkgident']
-hab_studio_pkgident = node['habitat-build']['hab-studio-pkgident']
-
-# e.g., `sample-verify-syntax`
-studio_slug = [
-  node['delivery']['change']['project'],
-  node['delivery']['change']['stage'],
-  node['delivery']['change']['phase']
-].join('-')
-
-# e.g., `/hab/studios/sample-verify-syntax`
-studio_path = ::File.join('/hab/studios', studio_slug)
+if habitat_origin_key?
+  keyname = project_secrets['habitat']['keyname']
+  origin = keyname.split('-')[0...-1].join('-')
+end
 
 # set local variables we're going to use in `lazy` properties later in
 # the chef run
 artifact = nil
-artifact_hash = nil
-artifact_pkgident = nil
+build_version = nil
 last_build_env = nil
+project_name = node['delivery']['change']['project']
 
-ruby_block 'build-plan' do
+execute 'build-plan' do
+  command "sudo #{hab_studio_binary}" \
+          " -r #{hab_studio_path}" \
+          " -k #{origin}" \
+          " build #{habitat_plan_dir}"
+  env(
+    'TERM' => 'ansi'
+  )
+  cwd node['delivery']['workspace']['repo']
+  live_stream true
+end
+
+ruby_block 'load-build-output' do
   block do
-    Dir.chdir(node['delivery']['workspace']['repo'])
-    ENV['TERM'] = 'ansi'
-    command = "sudo #{::File.join('/hab/pkgs', hab_studio_pkgident, 'bin/hab-studio')}"
-    command << " -r /hab/studios/#{studio_slug}"
-    command << " build #{habitat_plan_dir}"
-
-    build = shell_out(command)
-
-    if build.exitstatus > 0
-      puts build.stdout
-      puts build.stderr
-      raise 'The plan.sh did NOT come together, bailing out!'
-    end
-
-    last_build_env = Hash[*::File.read(::File.join('/hab/studios',
-                                                   studio_slug,
+    last_build_env = Hash[*::File.read(::File.join(hab_studio_path,
                                                    'src/results/last_build.env')).split(/[=\n]/)]
 
     artifact = last_build_env['pkg_artifact']
-    artifact_pkgident = last_build_env['pkg_ident']
+    build_version = [last_build_env['pkg_version'], last_build_env['pkg_release']].join('-')
   end
 end
 
-ruby_block 'artifact-hash' do
-  block do
-    command = "/hab/pkgs/#{hab_pkgident}/bin/hab"
-    command << " artifact hash #{::File.join(studio_path, '/src/results', artifact)}"
-    artifact_hash = shell_out(command).stdout.chomp
+if habitat_depot_token?
+  depot_token = project_secrets['habitat']['depot_token']
+
+  execute 'upload-pkg' do
+    command lazy {
+      "#{hab_binary} pkg upload" \
+      " --url #{node['habitat-build']['depot-url']}" \
+      " #{hab_studio_path}/src/results/#{artifact}"
+    }
+    env(
+      'HAB_AUTH_TOKEN' => depot_token
+    )
+    live_stream true
+    sensitive true
   end
 end
 
-execute 'upload-artifact' do
-  command lazy { "#{::File.join('/hab/pkgs', hab_pkgident, 'bin/hab')} artifact upload #{::File.join(studio_path, '/src/results', artifact)}" }
-end
+#########################################################################
+# Save artifact data in data bag and environment (delivery-truck compat)
+#########################################################################
 
 # update a data bag with the artifact build info
 # TODO: (jtimberman) This is not the first time this has been used in
@@ -83,12 +83,13 @@ ruby_block 'track-artifact-data' do # ~FC014
   block do
     load_delivery_chef_config
     proj = Chef::DataBag.new
-    proj.name(project_slug)
+    proj.name(project_name)
     proj.save
 
     proj_data = {
-      'id' => Time.now.utc.strftime('%F_%H%M'),
-      'artifact' => last_build_env.merge('type' => 'hart', 'hash' => artifact_hash),
+      'id' => build_version,
+      'version' => build_version,
+      'artifact' => last_build_env.merge('type' => 'hart'),
       'delivery_data' => node['delivery']
     }
 
@@ -96,5 +97,23 @@ ruby_block 'track-artifact-data' do # ~FC014
     proj_item.data_bag(proj.name)
     proj_item.raw_data = proj_data
     proj_item.save
+  end
+end
+
+ruby_block 'set-build-version-in-environment' do
+  block do
+    load_delivery_chef_config
+    begin
+      to_env = Chef::Environment.load(get_acceptance_environment)
+    rescue Net::HTTPServerException => http_e
+      raise http_e unless http_e.response.code.to_i == 404
+      to_env = Chef::Environment.new
+      to_env.name(get_acceptance_environment)
+      to_env.create
+    end
+
+    to_env.override_attributes['applications'] ||= {}
+    to_env.override_attributes['applications'][project_name] = build_version
+    to_env.save
   end
 end

@@ -16,16 +16,13 @@ depends 'delivery-truck'
 Add to your build cookbook's Berksfile:
 
 ```ruby
-cookbook 'delivery-sugar',
-         git: 'https://github.com/chef-cookbooks/delivery-sugar.git',
-         branch: 'master'
+source "https://supermarket.chef.io"
 
-group :delivery do
-  cookbook 'delivery_build', git: 'https://github.com/chef-cookbooks/delivery_build'
-  cookbook 'delivery-base', git: 'https://github.com/chef-cookbooks/delivery-base'
-  cookbook 'delivery-truck', git: 'https://github.com/chef-cookbooks/delivery-truck'
-  cookbook 'habitat-build', git: 'git@github.com:habitat-sh/habitat-build-cookbook'
-end
+metadata
+
+cookbook 'delivery-truck'
+cookbook 'delivery-sugar', git: 'https://github.com/chef-cookbooks/delivery-sugar.git'
+cookbook 'habitat-build',  git: 'https://github.com/chef-cookbooks/habitat-build.git'
 ```
 
 Include `habitat-build` recipes in your build cookbook's phase
@@ -113,7 +110,9 @@ Cookbook recipe helper methods.
 
 `habitat_plan_dir`: returns the directory where the plan lives. Searches the `delivery/config.json` of the build cookbook configuration, followed by an attribute, and falls back to `/src/habitat`.
 
-`habitat_secrets?`: predicate method that returns `true` if there's a data bag item for the project's secrets in Chef Delivery, and if it has non-empty origin secrets in a hash key `habitat`, `keyname`, `private_key`, and `public_key`.
+`habitat_origin_key?`: predicate method that returns `true` if there's a data bag item for the project's secrets in Chef Delivery, and if it has non-empty origin secrets in a hash key `habitat`, `keyname`, `private_key`, `public_key`.
+
+`habitat_depot_token?`: predicate method that returns `true` if there's a data bag item for the project's secrets in Chef Delivery, and if it has non-empty origin secrets in a hash key `habitat`, `depot_token`.
 
 ## License and Author
 

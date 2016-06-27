@@ -35,9 +35,44 @@ def habitat_plan_dir
   end
 end
 
+def habitat_origin_key?
+  project_secrets_exist?(%w(keyname private_key public_key))
+end
+
+def habitat_depot_token?
+  project_secrets_exist?(%w(depot_token))
+end
+
+def hab_binary
+  File.join('/hab/pkgs', node['habitat-build']['hab-pkgident'], 'bin/hab')
+end
+
+def hab_studio_binary
+  File.join('/hab/pkgs', node['habitat-build']['hab-studio-pkgident'], 'bin/hab-studio')
+end
+
+# For example, if the project is `surprise-sandwich`, and we're in the
+# Build stage's Publish phase, the slug will be:
+#
+#    `surprise-sandwich-build-publish`
+#
+def hab_studio_slug
+  [
+    node['delivery']['change']['project'],
+    node['delivery']['change']['stage'],
+    node['delivery']['change']['phase']
+  ].join('-')
+end
+
+def hab_studio_path
+  File.join('/hab/studios', hab_studio_slug)
+end
+
+private
+
 # if we're going to load secrets, we need to make sure we actually
 # have the data!
-def habitat_secrets?
+def project_secrets_exist?(secret_keys = [])
   load_delivery_chef_config
 
   begin
@@ -47,7 +82,7 @@ def habitat_secrets?
   end
 
   return false unless key_data.key?('habitat') && !key_data['habitat'].empty?
-  %w(keyname private_key public_key).each do |req_key|
+  secret_keys.each do |req_key|
     if key_data['habitat'].key?(req_key) && !key_data['habitat'][req_key].empty?
       next
     else

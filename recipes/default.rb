@@ -23,28 +23,10 @@ execute('apt-get update') { ignore_failure true }
 
 package ['xz-utils', 'shellcheck']
 
-hab_pkgident = node['habitat-build']['hab-pkgident']
-hab_studio_pkgident = node['habitat-build']['hab-studio-pkgident']
 file_cache_path = Chef::Config[:file_cache_path]
 
-# For example, if the project is `surprise-sandwich`, and we're in the
-# Build stage's Publish phase, the slug will be:
-#
-#    `surprise-sandwich-build-publish`
-studio_slug = [
-  node['delivery']['change']['project'],
-  node['delivery']['change']['stage'],
-  node['delivery']['change']['phase']
-].join('-')
-
-ENV['PATH'] = [
-  "/hab/pkgs/#{hab_pkgident}/bin",
-  "/hab/pkgs/#{hab_studio_pkgident}/bin",
-  ENV['PATH']
-].join(':')
-
-remote_file "#{Chef::Config[:file_cache_path]}/core-hab.hart" do
-  source "#{node['habitat-build']['depot-url']}/pkgs/#{hab_pkgident}/download"
+remote_file "#{file_cache_path}/core-hab.hart" do
+  source "#{node['habitat-build']['depot-url']}/pkgs/#{node['habitat-build']['hab-pkgident']}/download"
 end
 
 execute 'extract-hab' do
@@ -55,25 +37,7 @@ end
 # `hab studio` command as root because it requires privileged access
 # to bind mount the project directory in the studio.
 file '/etc/sudoers.d/dbuild-hab-studio' do
-  content "dbuild ALL=(ALL) NOPASSWD: /hab/pkgs/#{hab_studio_pkgident}/bin/hab studio\n"
-end
-
-# Before we get started, clean up from a previous build
-execute "remove-studio #{studio_slug}" do
-  command "hab studio -r /hab/studios/#{studio_slug} rm"
-  cwd node['delivery']['workspace']['repo']
-  ignore_failure true
-end
-
-# Create the new studio. These are lightweight until an artifact is
-# actually built.
-execute "create-studio #{studio_slug}" do
-  command "hab studio -r /hab/studios/#{studio_slug} new"
-  cwd node['delivery']['workspace']['repo']
-end
-
-directory "/hab/studios/#{studio_slug}/hab/cache/keys" do
-  recursive true
+  content "dbuild ALL=(ALL) NOPASSWD: /hab/pkgs/#{node['habitat-build']['hab-studio-pkgident']}/bin/hab-studio\n"
 end
 
 # Attempt to load the origin key from `delivery-secrets` data bag item
@@ -85,7 +49,7 @@ keyname = nil
 private_key = nil
 public_key = nil
 
-if habitat_secrets?
+if habitat_origin_key?
   load_delivery_chef_config
   key_data = get_project_secrets
   private_key = key_data['habitat']['private_key']
@@ -95,13 +59,13 @@ else
   ruby_block 'origin-key-generate' do
     block do
       Dir.chdir(node['delivery']['workspace']['repo'])
-      command = "/hab/pkgs/#{hab_pkgident}/bin/hab"
+      command = hab_binary
       command << ' origin key generate'
       command << ' delivery'
       key_gen = shell_out(command)
-      keyname = key_gen.stdout.gsub(/\e\[(\d+)m/, '').chomp.split.last
-      private_key = IO.read("/hab/cache/keys/#{keyname}sig.key")
-      public_key = IO.read("/hab/cache/keys/#{keyname}pub")
+      keyname = key_gen.stdout.gsub(/\e\[(\d+)m/, '').chomp.split.last.chop
+      private_key = IO.read("/hab/cache/keys/#{keyname}.sig.key")
+      public_key = IO.read("/hab/cache/keys/#{keyname}.pub")
     end
   end
 end
@@ -111,7 +75,7 @@ end
 # latter is fine because Chef is convergent and won't change the file
 # if it doesn't need to.
 file 'source-private-key' do
-  path lazy { "/hab/cache/keys/#{keyname}sig.key" }
+  path lazy { "/hab/cache/keys/#{keyname}.sig.key" }
   content lazy { private_key }
   sensitive true
   owner 'dbuild'
@@ -119,24 +83,8 @@ file 'source-private-key' do
 end
 
 file 'source-public-key' do
-  path lazy { "/hab/cache/keys/#{keyname}pub" }
+  path lazy { "/hab/cache/keys/#{keyname}.pub" }
   content lazy { public_key }
-  sensitive true
-  owner 'dbuild'
-  mode '0600'
-end
-
-file 'studio-private-key' do
-  path lazy { "/hab/studios/#{studio_slug}/hab/cache/keys/#{keyname}sig.key" }
-  content lazy { IO.read("/hab/cache/keys/#{keyname}sig.key") }
-  sensitive true
-  owner 'dbuild'
-  mode '0600'
-end
-
-file 'origin-public-key' do
-  path lazy { "/hab/studios/#{studio_slug}/hab/cache/keys/#{keyname}pub" }
-  content lazy { IO.read("/hab/cache/keys/#{keyname}pub") }
   sensitive true
   owner 'dbuild'
   mode '0600'
