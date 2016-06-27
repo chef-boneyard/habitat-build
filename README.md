@@ -63,7 +63,7 @@ Does nothing in this cookbook.
 
 ### lint
 
-Performs a [lint check](https://en.wikipedia.org/wiki/Lint_(software) against the `habitat/plan.sh` using the [ShellCheck](https://www.shellcheck.net/) static analysis tool. Specific codes can be ignored by ShellCheck by adding them to the node attribute array, `node['habitat-build']['shellcheck-excludes']`.
+Performs a [lint check](https://en.wikipedia.org/wiki/Lint_\(software\)) against the `habitat/plan.sh` using the [ShellCheck](https://www.shellcheck.net/) static analysis tool. Specific codes can be ignored by ShellCheck by adding them to the node attribute array, `node['habitat-build']['shellcheck-excludes']`.
 
 **Note**: This attribute will become a Delivery `config.json` option.
 
