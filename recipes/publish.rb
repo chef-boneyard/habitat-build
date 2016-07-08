@@ -33,10 +33,10 @@ last_build_env = nil
 project_name = node['delivery']['change']['project']
 
 execute 'build-plan' do
-  command "sudo #{hab_studio_binary}" \
+  command "sudo #{hab_binary} pkg build" \
           " -r #{hab_studio_path}" \
           " -k #{origin}" \
-          " build #{habitat_plan_dir}"
+          " #{habitat_plan_dir}"
   env(
     'TERM' => 'ansi'
   )
