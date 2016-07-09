@@ -34,7 +34,6 @@ project_name = node['delivery']['change']['project']
 
 execute 'build-plan' do
   command "sudo #{hab_binary} pkg build" \
-          " -r #{hab_studio_path}" \
           " -k #{origin}" \
           " #{habitat_plan_dir}"
   env(
