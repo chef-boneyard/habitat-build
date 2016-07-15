@@ -47,10 +47,6 @@ def hab_binary
   File.join('/hab/pkgs', node['habitat-build']['hab-pkgident'], 'bin/hab')
 end
 
-def hab_studio_binary
-  File.join('/hab/pkgs', node['habitat-build']['hab-studio-pkgident'], 'bin/hab-studio')
-end
-
 # For example, if the project is `surprise-sandwich`, and we're in the
 # Build stage's Publish phase, the slug will be:
 #
