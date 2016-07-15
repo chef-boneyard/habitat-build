@@ -34,10 +34,10 @@ execute 'extract-hab' do
 end
 
 # phases are run as the `dbuild` user, and we need to execute the
-# `hab studio` command as root because it requires privileged access
+# `hab` command as root because it requires privileged access
 # to bind mount the project directory in the studio.
-file '/etc/sudoers.d/dbuild-hab-studio' do
-  content "dbuild ALL=(ALL) NOPASSWD: /hab/pkgs/#{node['habitat-build']['hab-studio-pkgident']}/bin/hab-studio\n"
+file '/etc/sudoers.d/dbuild-hab' do
+  content "dbuild ALL=(ALL) NOPASSWD: /hab/pkgs/#{node['habitat-build']['hab-pkgident']}/bin/hab\n"
 end
 
 # Attempt to load the origin key from `delivery-secrets` data bag item
