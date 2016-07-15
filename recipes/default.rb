@@ -74,6 +74,12 @@ end
 # from either the generated data bag, or the key on disk itself. The
 # latter is fine because Chef is convergent and won't change the file
 # if it doesn't need to.
+directory '/hab/cache/keys' do
+  recursive true
+  owner 'root'
+  group 'root'
+end
+
 file 'source-private-key' do
   path lazy { "/hab/cache/keys/#{keyname}.sig.key" }
   content lazy { private_key }
