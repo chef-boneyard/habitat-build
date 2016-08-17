@@ -23,7 +23,7 @@ default['habitat-build']['depot-url'] = 'https://willem.habitat.sh/v1/depot'
 # really doesn't matter - these are in the depot now, and will be
 # available forevermore. Until they're not. And then we'll update
 # these attributes.
-default['habitat-build']['hab-pkgident'] = 'core/hab/0.7.0/20160614230104'
+default['habitat-build']['hab-pkgident'] = 'core/hab/0.9.0/20160815225003'
 
 # An array of codes to ignore in shellcheck (lint checker). By default
 # we exclude:
