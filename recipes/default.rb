@@ -78,7 +78,7 @@ end
   '/hab/cache/keys',
   # Habitat 0.8.0+ looks for the key cache in $HOME if a `hab` command is
   # executed by a non-root user.
-  File.join(delivery_workspace_cache, '.hab', 'cache', 'keys')
+  File.join(delivery_workspace, '.hab', 'cache', 'keys')
 ].each do |key_cache_dir|
   directory key_cache_dir do
     recursive true
