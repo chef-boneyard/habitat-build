@@ -64,6 +64,7 @@ if habitat_depot_token?
       " #{hab_studio_path}/src/results/#{artifact}"
     }
     env(
+      'HOME' => delivery_workspace,
       'HAB_AUTH_TOKEN' => depot_token
     )
     live_stream true
