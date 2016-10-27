@@ -64,6 +64,11 @@ def hab_studio_path
   File.join('/hab/studios', hab_studio_slug)
 end
 
+def changed_habitat_files?
+  # `changed_files` comes from the delivery-sugar DSL: https://git.io/vXvAm
+  changed_files.select { |changed_file| changed_file =~ %r{habitat/} }.any?
+end
+
 private
 
 # if we're going to load secrets, we need to make sure we actually
