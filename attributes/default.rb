@@ -19,12 +19,6 @@
 # TODO: (jtimberman) Configure this from a Delivery `config.json`.
 default['habitat-build']['depot-url'] = 'https://willem.habitat.sh/v1/depot'
 
-# TODO: (jtimberman) Maybe we can discover these at some point, but it
-# really doesn't matter - these are in the depot now, and will be
-# available forevermore. Until they're not. And then we'll update
-# these attributes.
-default['habitat-build']['hab-pkgident'] = 'core/hab/0.9.0/20160815225003'
-
 # An array of codes to ignore in shellcheck (lint checker). By default
 # we exclude:
 #

@@ -19,25 +19,19 @@
 #
 # At this time we assume Ubuntu 15.04+ build nodes; these packages are
 # not available on earlier Ubuntu releases.
-execute('apt-get update') { ignore_failure true }
+apt_update cookbook_name
 
 package ['xz-utils', 'shellcheck']
 
-file_cache_path = Chef::Config[:file_cache_path]
-
-remote_file "#{file_cache_path}/core-hab.hart" do
-  source "#{node['habitat-build']['depot-url']}/pkgs/#{node['habitat-build']['hab-pkgident']}/download"
-end
-
-execute 'extract-hab' do
-  command "tail -n +6 #{file_cache_path}/core-hab.hart | xzcat | tar xf - -C /"
+hab_install 'latest-habitat' do
+  action :upgrade
 end
 
 # phases are run as the `dbuild` user, and we need to execute the
 # `hab` command as root because it requires privileged access
 # to bind mount the project directory in the studio.
 file '/etc/sudoers.d/dbuild-hab' do
-  content "dbuild ALL=(ALL) NOPASSWD: /hab/pkgs/#{node['habitat-build']['hab-pkgident']}/bin/hab\n"
+  content "dbuild ALL=(ALL) NOPASSWD: /bin/hab\n"
 end
 
 # Attempt to load the origin key from `delivery-secrets` data bag item

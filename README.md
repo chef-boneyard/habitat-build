@@ -1,6 +1,6 @@
 # habitat-build
 
-A build cookbook for running the parent project through Chef Delivery
+A build cookbook for running the parent project through Chef Automate.
 
 This build cookbook should be customized to suit the needs of the parent project. Do this by "wrapping" the cookbook as a dependency in your project's build cookbook.
 
@@ -25,8 +25,7 @@ cookbook 'delivery-sugar', git: 'https://github.com/chef-cookbooks/delivery-suga
 cookbook 'habitat-build',  git: 'https://github.com/chef-cookbooks/habitat-build.git'
 ```
 
-Include `habitat-build` recipes in your build cookbook's phase
-recipes. For example in your build cookbook's `lint` recipe:
+Include `habitat-build` recipes in your build cookbook's phase recipes. For example in your build cookbook's `lint` recipe:
 
 ```ruby
 include_recipe 'habitat-build::lint'
@@ -36,17 +35,14 @@ Your project must have a `./habitat` directory that contains the `plan.sh` file 
 
 ## Attributes
 
-`node['habitat-build']['depot-url']` URL to the Habitat Depot where packages are published.
-
-`node['habitat-build']['hab-pkgident']` Package identifier for the `core/hab` package.
-
-`node['habitat-build']['shellcheck-excludes']` `Array` of ShellCheck codes to [ignore](https://github.com/koalaman/shellcheck/wiki/Ignore).
+* `node['habitat-build']['depot-url']`: URL to the Habitat Depot where packages are published.
+* `node['habitat-build']['shellcheck-excludes']`: `Array` of ShellCheck codes to [ignore](https://github.com/koalaman/shellcheck/wiki/Ignore).
 
 ## Recipes
 
 ### default
 
-Sets up a Chef Delivery build node so that it can build Habitat packages in a Studio.
+Sets up a Chef Automate build node so that it can build Habitat packages in a Studio.
 
 ### deploy
 

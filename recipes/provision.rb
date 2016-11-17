@@ -21,7 +21,9 @@
 # Take advantage of delivery-truck's built in version pinning and promotion
 include_recipe 'delivery-truck::provision'
 
-# TODO: re-enable this when `Habitat::Client` supports Depots that require authn
+# TODO: re-enable this when `Habitat::Client` supports Depots that
+# require authentication, and if a private depot URL is supplied
+#
 # ruby_block 'promote-artifact' do
 #   block do
 #     hc = Habitat::Client.new
