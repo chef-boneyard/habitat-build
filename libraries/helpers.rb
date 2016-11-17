@@ -44,7 +44,11 @@ def habitat_depot_token?
 end
 
 def hab_binary
-  File.join('/hab/pkgs', node['habitat-build']['hab-pkgident'], 'bin/hab')
+  if platform_family?('mac_os_x')
+    '/usr/local/bin/hab'
+  else
+    '/bin/hab'
+  end
 end
 
 # For example, if the project is `surprise-sandwich`, and we're in the
