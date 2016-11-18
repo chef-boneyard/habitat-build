@@ -48,7 +48,7 @@ if changed_habitat_files?
 
   ruby_block 'load-build-output' do
     block do
-      last_build_env = Hash[*::File.read(::File.join(node['delivery']['workspace']['repo'],
+      last_build_env = Hash[*::File.read(::File.join(hab_studio_path,
                                                      'src/results/last_build.env')).split(/[=\n]/)]
 
       artifact = last_build_env['pkg_artifact']
