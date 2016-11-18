@@ -35,12 +35,11 @@ if changed_habitat_files?
   project_name = node['delivery']['change']['project']
 
   execute 'build-plan' do
-    command "sudo #{hab_binary} studio" \
+    command "unset TERM; sudo #{hab_binary} studio" \
             " -r #{hab_studio_path}" \
-            " -k #{origin}" \
             " build #{habitat_plan_dir}"
     env(
-      'TERM' => '', 'HAB_ORIGIN' => origin
+      'HAB_ORIGIN' => origin
     )
     cwd node['delivery']['workspace']['repo']
     live_stream true
