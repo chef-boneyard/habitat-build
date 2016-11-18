@@ -40,7 +40,7 @@ if changed_habitat_files?
             " -k #{origin}" \
             " build #{habitat_plan_dir}"
     env(
-      'TERM' => '', 'HAB_ORIGIN' => "#{origin}"
+      'TERM' => '', 'HAB_ORIGIN' => origin
     )
     cwd node['delivery']['workspace']['repo']
     live_stream true
