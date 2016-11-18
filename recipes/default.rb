@@ -31,7 +31,7 @@ end
 # `hab` command as root because it requires privileged access
 # to bind mount the project directory in the studio.
 file '/etc/sudoers.d/dbuild-hab' do
-  content "dbuild ALL=(ALL) NOPASSWD: /bin/hab\n"
+  content "Defaults!/bin/hab env_keep += \"TERM DEBUG HAB_ORIGIN HAB_ORIGIN_KEYS\"\ndbuild ALL=(ALL) NOPASSWD: /bin/hab\n"
 end
 
 # Attempt to load the origin key from `delivery-secrets` data bag item
