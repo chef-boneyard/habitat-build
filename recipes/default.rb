@@ -30,8 +30,14 @@ end
 # phases are run as the `dbuild` user, and we need to execute the
 # `hab` command as root because it requires privileged access
 # to bind mount the project directory in the studio.
+#
+# delete the old file that we used first
+file '/etc/sudoers.d/dbuild-hab-studio' do
+  action :delete
+end
+
 file '/etc/sudoers.d/dbuild-hab' do
-  content "dbuild ALL=(ALL) NOPASSWD: /bin/hab\n"
+  content "dbuild ALL=(ALL) SETENV:NOPASSWD: /bin/hab\n"
 end
 
 # Attempt to load the origin key from `delivery-secrets` data bag item
