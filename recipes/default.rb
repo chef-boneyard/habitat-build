@@ -27,6 +27,10 @@ hab_install 'latest-habitat' do
   action :upgrade
 end
 
+hab_package 'core/hab-studio' do
+  action :upgrade
+end
+
 # phases are run as the `dbuild` user, and we need to execute the
 # `hab` command as root because it requires privileged access
 # to bind mount the project directory in the studio.
