@@ -78,18 +78,27 @@ end
 # from either the generated data bag, or the key on disk itself. The
 # latter is fine because Chef is convergent and won't change the file
 # if it doesn't need to.
+#
+# Habitat 0.8.0+ looks for the key cache in $HOME if a `hab` command is
+# executed by a non-root user.
+
+directory '/hab/cache/keys' do
+  recursive true
+  owner 'root'
+  group 'root'
+end
+
+['.hab', '.hab/cache', '.hab/cache/keys'].each do |dir|
+  directory File.join(delivery_workspace, dir) do
+    recursive true
+    owner 'dbuild'
+  end
+end
+
 [
   '/hab/cache/keys',
-  # Habitat 0.8.0+ looks for the key cache in $HOME if a `hab` command is
-  # executed by a non-root user.
   File.join(delivery_workspace, '.hab', 'cache', 'keys')
 ].each do |key_cache_dir|
-  directory key_cache_dir do
-    recursive true
-    owner 'root'
-    group 'root'
-  end
-
   file "#{key_cache_dir} private-key" do
     path lazy { File.join(key_cache_dir, "#{keyname}.sig.key") }
     content lazy { private_key }
