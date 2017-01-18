@@ -97,3 +97,15 @@ def project_secrets_exist?(secret_keys = [])
 
   true
 end
+
+def last_build_env
+  Hash[*::File.read(::File.join(hab_studio_path,'src/results/last_build.env')).split(/[=\n]/)]
+end
+
+def artifact
+  last_build_env['pkg_artifact']
+end
+
+def build_version
+  [last_build_env['pkg_version'], last_build_env['pkg_release']].join('-')
+end
