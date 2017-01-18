@@ -5,6 +5,12 @@
     "name": "build-cookbook"
   },
   "delivery-truck": {
+    "lint": {
+      "enable_cookstyle": true,
+      "foodcritic": {
+        "excludes": ["spec", "test"]
+      }
+    },
     "publish": {
       "github": "chef-cookbooks/habitat-build"
     }

@@ -60,7 +60,7 @@ def hab_studio_slug
   [
     node['delivery']['change']['project'],
     node['delivery']['change']['stage'],
-    node['delivery']['change']['phase']
+    node['delivery']['change']['phase'],
   ].join('-')
 end
 
@@ -87,13 +87,23 @@ def project_secrets_exist?(secret_keys = [])
   end
 
   return false unless key_data.key?('habitat') && !key_data['habitat'].empty?
+
   secret_keys.each do |req_key|
-    if key_data['habitat'].key?(req_key) && !key_data['habitat'][req_key].empty?
-      next
-    else
-      return false
-    end
+    next if key_data['habitat'].key?(req_key) && !key_data['habitat'][req_key].empty?
+    return false
   end
 
   true
+end
+
+def last_build_env
+  Hash[*::File.read(::File.join(hab_studio_path, 'src/results/last_build.env')).split(/[=\n]/)]
+end
+
+def artifact
+  last_build_env['pkg_artifact']
+end
+
+def build_version
+  [last_build_env['pkg_version'], last_build_env['pkg_release']].join('-')
 end
