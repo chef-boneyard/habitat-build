@@ -29,44 +29,19 @@ if changed_habitat_files?
 
   # set local variables we're going to use in `lazy` properties later in
   # the chef run
-  artifact = nil
   build_version = nil
-  last_build_env = nil
   project_name = node['delivery']['change']['project']
 
-  execute 'build-plan' do
-    command "unset TERM; HAB_ORIGIN=#{origin} sudo -E #{hab_binary} studio" \
-            " -r #{hab_studio_path}" \
-            " build #{habitat_plan_dir}"
-    cwd node['delivery']['workspace']['repo']
-    live_stream true
-  end
-
-  ruby_block 'load-build-output' do
-    block do
-      last_build_env = Hash[*::File.read(::File.join(hab_studio_path,
-                                                     'src/results/last_build.env')).split(/[=\n]/)]
-
-      artifact = last_build_env['pkg_artifact']
-      build_version = [last_build_env['pkg_version'], last_build_env['pkg_release']].join('-')
-    end
-  end
-
+  # Only build and publish if we have a depot token
   if habitat_depot_token?
-    depot_token = project_secrets['habitat']['depot_token']
-
-    execute 'upload-pkg' do
-      command lazy {
-        "#{hab_binary} pkg upload" \
-        " --url #{node['habitat-build']['depot-url']}" \
-        " #{hab_studio_path}/src/results/#{artifact}"
-      }
-      env(
-        'HOME' => delivery_workspace,
-        'HAB_AUTH_TOKEN' => depot_token
-      )
-      live_stream true
-      sensitive true
+    habitat project_name do
+      origin origin
+      plan_dir habitat_plan_dir
+      cwd node['delivery']['workspace']['repo']
+      home_dir delivery_workspace
+      auth_token project_secrets['habitat']['depot_token']
+      url node['habitat-build']['depot-url']
+      action [:build, :publish]
     end
   end
 
@@ -89,7 +64,7 @@ if changed_habitat_files?
         'id' => build_version,
         'version' => build_version,
         'artifact' => last_build_env.merge('type' => 'hart'),
-        'delivery_data' => node['delivery']
+        'delivery_data' => node['delivery'],
       }
 
       proj_item = Chef::DataBagItem.new

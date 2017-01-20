@@ -97,7 +97,7 @@ end
 
 [
   '/hab/cache/keys',
-  File.join(delivery_workspace, '.hab', 'cache', 'keys')
+  File.join(delivery_workspace, '.hab', 'cache', 'keys'),
 ].each do |key_cache_dir|
   file "#{key_cache_dir} private-key" do
     path lazy { File.join(key_cache_dir, "#{keyname}.sig.key") }
