@@ -13,7 +13,7 @@ property :url, String
 property :artifact, String
 property :home_dir, String
 property :auth_token, String
-property :live_stream, Boolean, default: true
+property :live_stream, [TrueClass, FalseClass], default: true
 
 action :build do
   execute 'build-plan' do
