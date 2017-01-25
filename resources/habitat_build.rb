@@ -13,6 +13,7 @@ property :url, String
 property :artifact, String
 property :home_dir, String
 property :auth_token, String
+property :live_stream, Boolean, default: true
 
 action :build do
   execute 'build-plan' do
@@ -21,7 +22,7 @@ action :build do
             " build #{plan_dir}"
     environment('TERM' => 'vt100', 'HAB_ORIGIN' => origin)
     cwd new_resource.cwd
-    live_stream true
+    live_stream new_resource.live_stream
   end
 end
 
@@ -36,7 +37,7 @@ action :publish do
       'HOME' => home_dir,
       'HAB_AUTH_TOKEN' => auth_token
     )
-    live_stream true
+    live_stream new_resource.live_stream
     sensitive true
   end
 end
