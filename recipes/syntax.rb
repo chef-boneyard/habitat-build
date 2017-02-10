@@ -19,6 +19,6 @@
 #
 
 execute 'syntax-check-plan' do
-  command 'bash -n habitat/plan.sh'
+  command 'find . -name "plan.sh" -exec bash -n {} \;'
   cwd node['delivery']['workspace']['repo']
 end
