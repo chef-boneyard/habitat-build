@@ -27,14 +27,9 @@ if changed_habitat_files?
     origin = keyname.split('-')[0...-1].join('-')
   end
 
-  # set local variables we're going to use in `lazy` properties later in
-  # the chef run
-  build_version = nil
-  project_name = node['delivery']['change']['project']
-
   # Only build and publish if we have a depot token
   if habitat_depot_token?
-    hab_build project_name do
+    hab_build node['delivery']['change']['project'] do
       origin origin
       plan_dir habitat_plan_dir
       cwd node['delivery']['workspace']['repo']
@@ -42,31 +37,6 @@ if changed_habitat_files?
       auth_token project_secrets['habitat']['depot_token']
       url node['habitat-build']['depot-url']
       action [:build, :publish]
-    end
-  end
-
-  #########################################################################
-  # Save artifact data in data bag and environment (delivery-truck compat)
-  #########################################################################
-
-  # update a data bag with the artifact build info
-  load_delivery_chef_config
-  chef_data_bag project_name
-
-  chef_data_bag_item build_version do
-    raw_data lazy do
-      {
-        'id' => build_version,
-        'version' => build_version,
-        'artifact' => last_build_env.merge('type' => 'hart'),
-        'delivery_data' => node['delivery'],
-      }
-    end
-  end
-
-  chef_environment get_acceptance_environment do
-    override_attributes lazy do
-      { project_name => build_version }
     end
   end
 end
