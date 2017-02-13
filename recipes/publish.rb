@@ -34,7 +34,7 @@ if changed_habitat_files?
 
   # Only build and publish if we have a depot token
   if habitat_depot_token?
-    habitat project_name do
+    hab_build project_name do
       origin origin
       plan_dir habitat_plan_dir
       cwd node['delivery']['workspace']['repo']
