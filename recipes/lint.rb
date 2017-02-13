@@ -21,6 +21,6 @@
 execute 'lint-check-plan' do
   # by targetting bash, we avoid warning on SC2148
   # https://github.com/koalaman/shellcheck/wiki/SC2148
-  command "find . -name 'plan.sh' -exec shellcheck -e #{node['habitat-build']['shellcheck-excludes'].join(',')} -s bash {} \;"
+  command "find . -name 'plan.sh' -exec shellcheck -e #{node['habitat-build']['shellcheck-excludes'].join(',')} -s bash {} \\;"
   cwd node['delivery']['workspace']['repo']
 end
