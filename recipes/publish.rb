@@ -53,7 +53,10 @@ if changed_habitat_files?
   load_delivery_chef_config
   chef_data_bag project_name
 
-  chef_data_bag_item build_version do
+  chef_data_bag_item 'store-artifact-data' do
+    # build version is calculated in the hab_build resource above, so
+    # we need to lazy load it.
+    name lazy { build_version }
     raw_data lazy do
       {
         'id' => build_version,
