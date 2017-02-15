@@ -20,7 +20,9 @@ action :build do
     command "sudo -E #{hab_binary} studio" \
             " -r #{hab_studio_path}" \
             " build #{plan_dir}"
-    environment('TERM' => 'vt100', 'HAB_ORIGIN' => origin)
+    environment('TERM' => 'vt100',
+                'HAB_ORIGIN' => origin,
+                'HAB_NONINTERACTIVE' => 'true')
     cwd new_resource.cwd
     live_stream new_resource.live_stream
   end
@@ -30,7 +32,8 @@ action :publish do
   execute 'upload-pkg' do
     command lazy { "#{hab_binary} pkg upload --url #{url} #{hab_studio_path}/src/results/#{artifact}" }
     env('HOME' => home_dir,
-        'HAB_AUTH_TOKEN' => auth_token)
+        'HAB_AUTH_TOKEN' => auth_token,
+        'HAB_NONINTERACTIVE' => 'true')
     live_stream new_resource.live_stream
     sensitive true
   end

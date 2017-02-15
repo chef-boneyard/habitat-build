@@ -2,7 +2,7 @@ name 'habitat-build'
 maintainer 'The Habitat Maintainers'
 maintainer_email 'humans@habitat.sh'
 license 'apache2'
-version '0.10.6'
+version '0.10.7'
 
 depends 'delivery-sugar'
 depends 'delivery-truck'
