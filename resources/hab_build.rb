@@ -62,7 +62,7 @@ action :publish do
 
   chef_environment get_acceptance_environment do
     override_attributes lazy {
-      { new_resource.name => build_version }
+      existing_acceptance_environment.fetch('override_attributes', {}).merge(new_resource.name => build_version)
     }
   end
 end
