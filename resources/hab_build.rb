@@ -16,6 +16,8 @@ property :auth_token, String
 property :live_stream, [TrueClass, FalseClass], default: true
 
 action_class do
+  include HabitatBuildCookbook::Helpers
+
   def data_bag_item_id
     build_version.tr('/', '-')
   end
