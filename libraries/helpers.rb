@@ -25,15 +25,6 @@
 #     "plan_dir": "/elsewhere/plans/myplan"
 #   }
 # }
-
-# The current acceptance environment on the server
-def existing_acceptance_environment
-  Chef::ServerAPI.new.get("environments/#{get_acceptance_environment}")
-rescue Net::HTTPServerException => e
-  raise e unless e.response.code.to_i == 404
-  {}
-end
-
 def habitat_plan_dir
   if node['delivery']['config'].attribute?('habitat') &&
      node['delivery']['config']['habitat'].attribute?('plan_dir')

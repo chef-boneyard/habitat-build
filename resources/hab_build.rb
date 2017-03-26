@@ -15,6 +15,23 @@ property :home_dir, String
 property :auth_token, String
 property :live_stream, [TrueClass, FalseClass], default: true
 
+action_class do
+  # The current acceptance environment on the server
+  def existing_acceptance_environment
+    Chef::ServerAPI.new.get("environments/#{get_acceptance_environment}")
+  rescue Net::HTTPServerException => e
+    raise e unless e.response.code.to_i == 404
+    {}
+  end
+
+  def updated_environment_overrides
+    existing_overrides = existing_acceptance_environment.fetch('override_attributes', {})
+    existing_overrides['applications'] ||= {}
+    existing_overrides['applications'][new_resource.name] = build_version
+    existing_overrides
+  end
+end
+
 action :build do
   execute 'build-plan' do
     command "sudo -E #{hab_binary} studio" \
@@ -62,7 +79,7 @@ action :publish do
 
   chef_environment get_acceptance_environment do
     override_attributes lazy {
-      existing_acceptance_environment.fetch('override_attributes', {}).merge(new_resource.name => build_version)
+      updated_environment_overrides
     }
   end
 end
