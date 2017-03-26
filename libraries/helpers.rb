@@ -104,5 +104,5 @@ def artifact
 end
 
 def build_version
-  [last_build_env['pkg_version'], last_build_env['pkg_release']].join('-')
+  [last_build_env['pkg_version'], last_build_env['pkg_release']].join('/')
 end

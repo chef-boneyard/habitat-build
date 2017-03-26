@@ -16,6 +16,10 @@ property :auth_token, String
 property :live_stream, [TrueClass, FalseClass], default: true
 
 action_class do
+  def data_bag_item_id
+    build_version.tr('/', '-')
+  end
+
   # The current acceptance environment on the server
   def existing_acceptance_environment
     Chef::ServerAPI.new.get("environments/#{get_acceptance_environment}")
@@ -67,10 +71,10 @@ action :publish do
   # converged resource, `hab_build`, above.
   #
   chef_data_bag_item "store-#{new_resource.name}-artifact-data" do
-    id lazy { build_version }
+    id lazy { data_bag_item_id }
     data_bag new_resource.name
     raw_data lazy {
-      { 'id' => build_version,
+      { 'id' => data_bag_item_id,
         'version' => build_version,
         'artifact' => last_build_env.merge('type' => 'hart'),
         'delivery_data' => node['delivery'] }
