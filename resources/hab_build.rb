@@ -10,6 +10,8 @@ property :origin, String, required: true
 property :plan_dir, String, required: true
 property :cwd, String, required: true
 property :url, String
+property :environment, Hash, default: {}
+property :retries, Integer, default: 0
 property :artifact, String
 property :home_dir, String
 property :auth_token, String
@@ -24,12 +26,13 @@ action :build do
     command "sudo -E #{hab_binary} studio" \
             " -r #{hab_studio_path}" \
             " build #{plan_dir}"
-    environment(
+    environment({
       'TERM' => 'vt100',
       'HAB_ORIGIN' => origin,
-      'HAB_NONINTERACTIVE' => 'true'
-    )
+      'HAB_NONINTERACTIVE' => 'true',
+    }.merge(new_resource.environment))
     cwd new_resource.cwd
+    retries new_resource.retries
     live_stream new_resource.live_stream
   end
 end
@@ -37,11 +40,12 @@ end
 action :publish do
   execute 'upload-pkg' do
     command lazy { "#{hab_binary} pkg upload --url #{url} #{hab_studio_path}/src/results/#{artifact}" }
-    env(
+    env({
       'HOME' => home_dir,
       'HAB_AUTH_TOKEN' => auth_token,
-      'HAB_NONINTERACTIVE' => 'true'
-    )
+      'HAB_NONINTERACTIVE' => 'true',
+    }.merge(new_resource.environment))
+    retries new_resource.retries
     live_stream new_resource.live_stream
     sensitive true
   end
