@@ -28,7 +28,7 @@ if changed_habitat_files?
   end
 
   # Only build and publish if we have a depot token
-  if habitat_depot_token?
+  if habitat_depot_token? # ~FC023
     hab_build node['delivery']['change']['project'] do
       origin origin
       plan_dir habitat_plan_dir

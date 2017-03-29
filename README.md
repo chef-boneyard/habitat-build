@@ -108,6 +108,12 @@ Cookbook recipe helper methods.
 
 `habitat_depot_token?`: predicate method that returns `true` if there's a data bag item for the project's secrets in Chef Delivery, and if it has non-empty origin secrets in a hash key `habitat`, `depot_token`.
 
+## Local Development
+
+If you have [ChefDK](https://downloads.chef.io/chefdk) installed you can run
+the unit, lint, and syntax checks against this cookbook locally with `delivery
+local verify`.
+
 ## License and Author
 
 - Author: Joshua Timberman <joshua@chef.io>
