@@ -4,4 +4,7 @@ metadata
 
 cookbook 'delivery-truck'
 cookbook 'delivery-sugar', git: 'https://github.com/chef-cookbooks/delivery-sugar.git'
-cookbook 'test', path: './test/fixtures/cookbooks/test'
+
+group :test do
+  cookbook 'test', path: './test/fixtures/cookbooks/test'
+end

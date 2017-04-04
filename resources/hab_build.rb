@@ -2,14 +2,11 @@ require_relative '../libraries/helpers'
 
 resource_name :hab_build
 
-actions :build, :publish
-default_action :build
-
 property :name, String, name_property: true
 property :origin, String, required: true
 property :plan_dir, String, required: true
 property :cwd, String, required: true
-property :url, String
+property :depot_url, String
 property :environment, Hash, default: {}
 property :retries, Integer, default: 0
 property :artifact, String
@@ -18,7 +15,34 @@ property :auth_token, String
 property :live_stream, [TrueClass, FalseClass], default: true
 
 action_class do
-  include HabitatBuildCookbook::Helpers
+  def artifact
+    last_build_env['pkg_artifact']
+  end
+
+  def build_version
+    [last_build_env['pkg_version'], last_build_env['pkg_release']].join('/')
+  end
+
+  def hab_studio_path
+    ::File.join('/hab/studios', hab_studio_slug)
+  end
+
+  # For example, if the project is `surprise-sandwich`, and we're in the
+  # Build stage's Publish phase, the slug will be:
+  #
+  #    `surprise-sandwich-build-publish`
+  #
+  def hab_studio_slug
+    [
+      node['delivery']['change']['project'],
+      node['delivery']['change']['stage'],
+      node['delivery']['change']['phase'],
+    ].join('-')
+  end
+
+  def last_build_env
+    Hash[*::File.read(::File.join(hab_studio_path, 'src/results/last_build.env')).split(/[=\n]/)]
+  end
 end
 
 action :build do
@@ -39,7 +63,10 @@ end
 
 action :publish do
   execute 'upload-pkg' do
-    command lazy { "#{hab_binary} pkg upload --url #{url} #{hab_studio_path}/src/results/#{artifact}" }
+    command(lazy do
+      url_opt = "--url #{depot_url}" if depot_url
+      "#{hab_binary} pkg upload #{url_opt} #{hab_studio_path}/src/results/#{artifact}"
+    end)
     env({
       'HOME' => home_dir,
       'HAB_AUTH_TOKEN' => auth_token,
