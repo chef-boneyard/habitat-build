@@ -8,6 +8,7 @@
     "lint": {
       "enable_cookstyle": true,
       "foodcritic": {
+        "ignore_rules": ["FC016"],
         "excludes": ["spec", "test"]
       }
     },

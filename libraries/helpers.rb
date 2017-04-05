@@ -54,29 +54,10 @@ module HabitatBuildCookbook
       end
     end
 
-    # For example, if the project is `surprise-sandwich`, and we're in the
-    # Build stage's Publish phase, the slug will be:
-    #
-    #    `surprise-sandwich-build-publish`
-    #
-    def hab_studio_slug
-      [
-        node['delivery']['change']['project'],
-        node['delivery']['change']['stage'],
-        node['delivery']['change']['phase'],
-      ].join('-')
-    end
-
-    def hab_studio_path
-      File.join('/hab/studios', hab_studio_slug)
-    end
-
     def changed_habitat_files?
       # `changed_files` comes from the delivery-sugar DSL: https://git.io/vXvAm
       changed_files.select { |changed_file| changed_file =~ %r{habitat/} }.any?
     end
-
-    private
 
     # if we're going to load secrets, we need to make sure we actually
     # have the data!
@@ -98,19 +79,8 @@ module HabitatBuildCookbook
 
       true
     end
-
-    def last_build_env
-      Hash[*::File.read(::File.join(hab_studio_path, 'src/results/last_build.env')).split(/[=\n]/)]
-    end
-
-    def artifact
-      last_build_env['pkg_artifact']
-    end
-
-    def build_version
-      [last_build_env['pkg_version'], last_build_env['pkg_release']].join('/')
-    end
   end
 end
 
 Chef::Recipe.send(:include, HabitatBuildCookbook::Helpers)
+Chef::Resource.send(:include, HabitatBuildCookbook::Helpers)
