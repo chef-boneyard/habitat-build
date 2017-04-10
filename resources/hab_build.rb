@@ -19,6 +19,18 @@ action_class do
     last_build_env['pkg_artifact']
   end
 
+  def build_environment
+    {
+      'TERM' => 'vt100',
+      'HAB_ORIGIN' => origin,
+      'HAB_NONINTERACTIVE' => 'true',
+    }.merge(new_resource.environment)
+  end
+
+  def build_environment_cli_string
+    "env #{build_environment.map { |k, v| "#{k}=\"#{v}\"" }.join(' ')}"
+  end
+
   def build_version
     [last_build_env['pkg_version'], last_build_env['pkg_release']].join('/')
   end
@@ -49,12 +61,8 @@ action :build do
   execute 'build-plan' do
     command "sudo -E #{hab_binary} studio" \
             " -r #{hab_studio_path}" \
-            " build #{plan_dir}"
-    environment({
-      'TERM' => 'vt100',
-      'HAB_ORIGIN' => origin,
-      'HAB_NONINTERACTIVE' => 'true',
-    }.merge(new_resource.environment))
+            " run #{build_environment_cli_string} build #{plan_dir}"
+    environment build_environment
     cwd new_resource.cwd
     retries new_resource.retries
     live_stream new_resource.live_stream
