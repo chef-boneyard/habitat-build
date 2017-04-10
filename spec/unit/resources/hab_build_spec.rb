@@ -30,7 +30,7 @@ EOF
 
     it 'builds the package with hab studio' do
       expect(chef_run).to run_execute('build-plan').with(
-        command: 'sudo -E /bin/hab studio -r /hab/studios/testproject-teststage-testphase build /src/pandas',
+        command: 'sudo -E /bin/hab studio -r /hab/studios/testproject-teststage-testphase run env TERM="vt100" HAB_ORIGIN="testorigin" HAB_NONINTERACTIVE="true" ABC="XYZ" build /src/pandas',
         environment: hash_including('ABC' => 'XYZ',
                                     'HAB_NONINTERACTIVE' => 'true')
       )
