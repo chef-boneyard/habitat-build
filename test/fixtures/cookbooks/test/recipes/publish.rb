@@ -17,6 +17,7 @@ execute 'hab origin key generate testorigin'
 hab_build 'testbuild' do
   action [:build, :publish]
   cwd '/plans'
+  environment('ABC' => 'XYZ')
   origin 'testorigin'
   plan_dir '/src/pandas'
   auth_token 'abcdef'
