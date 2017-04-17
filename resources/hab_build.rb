@@ -84,7 +84,9 @@ action :publish do
     live_stream new_resource.live_stream
     sensitive true
   end
+end
 
+action :publish_env_pin do
   ruby_block "create Habitat project release: #{new_resource.name} #{build_version}" do
     block do
       # This helper is part of the Delivery Sugar DSL...it's also an alias
