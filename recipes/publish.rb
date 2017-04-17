@@ -36,7 +36,7 @@ if changed_habitat_files?
       home_dir delivery_workspace
       auth_token project_secrets['habitat']['depot_token']
       url node['habitat-build']['depot-url']
-      action [:build, :publish]
+      action [:build, :publish, :save_application_release]
     end
   end
 end

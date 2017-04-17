@@ -24,4 +24,8 @@ if defined?(ChefSpec)
   def publish_hab_build(resource_name)
     ChefSpec::Matchers::ResourceMatcher.new(:hab_build, :publish, resource_name)
   end
+
+  def save_application_release_hab_build(resource_name)
+    ChefSpec::Matchers::ResourceMatcher.new(:hab_build, :save_application_release, resource_name)
+  end
 end
