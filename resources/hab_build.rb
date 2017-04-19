@@ -84,9 +84,12 @@ action :publish do
     live_stream new_resource.live_stream
     sensitive true
   end
+end
 
-  ruby_block "create Habitat project release: #{new_resource.name} #{build_version}" do
+action :save_application_release do
+  ruby_block "Create Automate project release for Habitat pakage: #{new_resource.name}" do
     block do
+      Chef::Log.debug("Build version: #{build_version}")
       # This helper is part of the Delivery Sugar DSL...it's also an alias
       # for `define_project_application`.
       create_workflow_application_release(
