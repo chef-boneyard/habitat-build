@@ -11,9 +11,6 @@
         "ignore_rules": ["FC016"],
         "excludes": ["spec", "test"]
       }
-    },
-    "publish": {
-      "github": "chef-cookbooks/habitat-build"
     }
   },
   "skip_phases": [],
