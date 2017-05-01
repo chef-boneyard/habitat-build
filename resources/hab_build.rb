@@ -12,7 +12,8 @@ property :retries, Integer, default: 0
 property :artifact, String
 property :home_dir, String
 property :auth_token, String
-property :live_stream, [TrueClass, FalseClass], default: true
+property :live_stream, [true, false], default: true
+property :cleanup, [true, false], default: false
 
 action_class do
   def artifact
@@ -67,6 +68,12 @@ action :build do
     retries new_resource.retries
     live_stream new_resource.live_stream
   end
+
+  execute 'remove-studio' do
+    command "sudo -E #{hab_binary} studio rm #{hab_studio_path}"
+    live_stream live_stream
+    only_if { cleanup }
+  end
 end
 
 action :publish do
@@ -83,6 +90,12 @@ action :publish do
     retries new_resource.retries
     live_stream new_resource.live_stream
     sensitive true
+  end
+
+  file 'remove-artifact' do
+    path lazy { "#{hab_studio_path}/src/results/#{artifact}" }
+    action :delete
+    only_if { cleanup }
   end
 end
 
