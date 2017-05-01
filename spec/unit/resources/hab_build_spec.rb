@@ -3,16 +3,16 @@ require_relative '../../../libraries/helpers'
 
 describe 'test::build' do
   describe ':build action' do
-    before do
-      allow(File).to receive(:read).and_call_original
-    end
+    let(:cleanup) { false }
 
-    cached(:chef_run) do
+    let(:chef_run) do
       ChefSpec::SoloRunner.new(
         step_into: ['hab_build'],
         platform: 'redhat',
         version: '7.2'
-      ).converge(described_recipe)
+      ) do |node|
+        node.default['cleanup'] = cleanup
+      end.converge(described_recipe)
     end
 
     it 'builds the package with hab studio' do
@@ -21,6 +21,23 @@ describe 'test::build' do
         environment: hash_including('ABC' => 'XYZ',
                                     'HAB_NONINTERACTIVE' => 'true')
       )
+    end
+
+    context 'when cleanup is set to false' do
+      let(:cleanup) { false }
+
+      it 'does not remove the studio' do
+        expect(chef_run).not_to run_execute('remove-studio')
+      end
+    end
+
+    context 'when cleanup is set to true' do
+      let(:cleanup) { true }
+
+      it 'removes the studio' do
+        expect(chef_run).to run_execute('remove-studio').with(
+          command: 'sudo -E /bin/hab studio rm /hab/studios/testproject-teststage-testphase')
+      end
     end
   end
 end
@@ -42,12 +59,17 @@ pkg_blake2bsum=17d058114159f2a5dbc6ffea2d1526f89b33944bbd9fd75cec79c97e10d4d2dd
 EOF
                 )
   end
-  cached(:chef_run) do
+
+  let(:cleanup) { false }
+
+  let(:chef_run) do
     ChefSpec::SoloRunner.new(
       step_into: ['hab_build'],
       platform: 'redhat',
       version: '7.2'
-    ).converge(described_recipe)
+    ) do |node|
+      node.default['cleanup'] = cleanup
+    end.converge(described_recipe)
   end
 
   it 'uploads an artifact with a custom depot URL' do
@@ -57,6 +79,20 @@ EOF
     expect(chef_run).to run_execute('upload-pkg').with(
       command: '/bin/hab pkg upload --url https://private-depot.example.com/v1/depot /hab/studios/testproject-teststage-testphase/src/results/purple-frogs-0.7.0-dev-20170403213025-x86_64-linux.hart'
     )
+  end
+
+  context 'when cleanup is set to false' do
+    it 'does not delete the artifact' do
+      expect(chef_run).not_to delete_file('remove-artifact')
+    end
+  end
+
+  context 'when cleanup is set to true' do
+    let(:cleanup) { true }
+
+    it 'deletes the artifact' do
+      expect(chef_run).to delete_file('remove-artifact')
+    end
   end
 end
 
