@@ -35,7 +35,7 @@ if changed_habitat_files?
       cwd node['delivery']['workspace']['repo']
       home_dir delivery_workspace
       auth_token project_secrets['habitat']['depot_token']
-      url node['habitat-build']['depot-url']
+      depot_url node['habitat-build']['depot-url']
       action [:build, :publish, :save_application_release]
     end
   end
