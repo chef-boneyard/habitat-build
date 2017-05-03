@@ -3,5 +3,4 @@ hab_build 'upload-with-url' do
   depot_url 'https://private-depot.example.com/v1/depot'
   origin 'testorigin'
   ignore_failure true
-  cleanup node['cleanup']
 end

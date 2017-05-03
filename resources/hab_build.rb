@@ -91,12 +91,6 @@ action :publish do
     live_stream new_resource.live_stream
     sensitive true
   end
-
-  file 'remove-artifact' do
-    path lazy { "#{hab_studio_path}/src/results/#{artifact}" }
-    action :delete
-    only_if { cleanup }
-  end
 end
 
 action :save_application_release do
