@@ -36,6 +36,10 @@ action_class do
     [last_build_env['pkg_version'], last_build_env['pkg_release']].join('/')
   end
 
+  def package_name
+    last_build_env['pkg_name']
+  end
+
   def hab_studio_path
     ::File.join('/hab/studios', hab_studio_slug)
   end
@@ -94,13 +98,13 @@ action :publish do
 end
 
 action :save_application_release do
-  ruby_block "Create Automate project release for Habitat pakage: #{new_resource.name}" do
+  ruby_block 'create-automate-project-release' do
     block do
       Chef::Log.debug("Build version: #{build_version}")
       # This helper is part of the Delivery Sugar DSL...it's also an alias
       # for `define_project_application`.
       create_workflow_application_release(
-        new_resource.name,
+        package_name,
         build_version,
         'artifact' => last_build_env.merge('type' => 'hart'),
         'delivery_data' => node['delivery']

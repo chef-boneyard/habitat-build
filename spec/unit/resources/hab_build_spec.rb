@@ -110,7 +110,7 @@ describe 'test::save_application_release' do
 
     it 'saves the application release' do
       expect(chef_run).to save_application_release_hab_build('save_application_release')
-      expect(chef_run).to run_ruby_block('Create Automate project release for Habitat pakage: save_application_release')
+      expect(chef_run).to run_ruby_block('create-automate-project-release')
     end
   end
 end
