@@ -29,14 +29,20 @@ if changed_habitat_files?
 
   # Only build and publish if we have a depot token
   if habitat_depot_token? # ~FC023
-    hab_build node['delivery']['change']['project'] do
-      origin origin
-      plan_dir habitat_plan_dir
-      cwd node['delivery']['workspace']['repo']
-      home_dir delivery_workspace
-      auth_token project_secrets['habitat']['depot_token']
-      depot_url node['habitat-build']['depot-url']
-      action [:build, :publish, :save_application_release]
+    modified_habitat_plan_contexts.each do |plan_context|
+      # Inside the build context, the "root" is called '/src'. In that scenario,
+      # we want to use the project name as the package name
+      pkg_name = plan_context == '/src' ? node['delivery']['change']['project'] : Pathname(plan_context).basename.to_s
+
+      hab_build pkg_name do
+        origin origin
+        plan_dir plan_context
+        cwd workflow_workspace_repo
+        home_dir workflow_workspace
+        auth_token project_secrets['habitat']['depot_token']
+        depot_url node['habitat-build']['depot-url']
+        action [:build, :publish, :save_application_release]
+      end
     end
   end
 end
