@@ -3,41 +3,23 @@ require_relative '../../../libraries/helpers'
 
 describe 'test::build' do
   describe ':build action' do
-    let(:cleanup) { false }
-
-    let(:chef_run) do
+    cached(:chef_run) do
       ChefSpec::SoloRunner.new(
         step_into: ['hab_build'],
         platform: 'redhat',
         version: '7.2'
-      ) do |node|
-        node.default['cleanup'] = cleanup
-      end.converge(described_recipe)
+      ).converge(described_recipe)
     end
 
     it 'builds the package with hab studio' do
+      expect(chef_run).to run_execute('remove-studio').with(
+        command: 'sudo -E /bin/hab studio -r /hab/studios/testproject-teststage-testphase rm')
+
       expect(chef_run).to run_execute('build-plan').with(
         command: 'sudo -E /bin/hab studio -r /hab/studios/testproject-teststage-testphase run env TERM="vt100" HAB_ORIGIN="testorigin" HAB_NONINTERACTIVE="true" ABC="XYZ" build /src/pandas',
         environment: hash_including('ABC' => 'XYZ',
                                     'HAB_NONINTERACTIVE' => 'true')
       )
-    end
-
-    context 'when cleanup is set to false' do
-      let(:cleanup) { false }
-
-      it 'does not remove the studio' do
-        expect(chef_run).not_to run_execute('remove-studio')
-      end
-    end
-
-    context 'when cleanup is set to true' do
-      let(:cleanup) { true }
-
-      it 'removes the studio' do
-        expect(chef_run).to run_execute('remove-studio').with(
-          command: 'sudo -E /bin/hab studio rm /hab/studios/testproject-teststage-testphase')
-      end
     end
   end
 end

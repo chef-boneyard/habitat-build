@@ -13,7 +13,6 @@ property :artifact, String
 property :home_dir, String
 property :auth_token, String
 property :live_stream, [true, false], default: true
-property :cleanup, [true, false], default: false
 
 action_class do
   def artifact
@@ -63,6 +62,13 @@ action_class do
 end
 
 action :build do
+  # Delete studio before we before we run. Run in Hab doesn't do this for us
+  # but build does.
+  execute 'remove-studio' do
+    command "sudo -E #{hab_binary} studio -r #{hab_studio_path} rm"
+    live_stream new_resource.live_stream
+  end
+
   execute 'build-plan' do
     command "sudo -E #{hab_binary} studio" \
             " -r #{hab_studio_path}" \
@@ -71,12 +77,6 @@ action :build do
     cwd new_resource.cwd
     retries new_resource.retries
     live_stream new_resource.live_stream
-  end
-
-  execute 'remove-studio' do
-    command "sudo -E #{hab_binary} studio rm #{hab_studio_path}"
-    live_stream live_stream
-    only_if { cleanup }
   end
 end
 
