@@ -117,6 +117,8 @@ Does nothing in this cookbook.
 
 Cookbook recipe helper methods.
 
+`habitat_plan_dir`: returns the directory where the plan lives. Searches the `delivery/config.json` of the build cookbook configuration, followed by an attribute, and falls back to `/src/habitat`.
+
 `habitat_plan_contexts`: returns a list of Habitat plan contexts in your project repository. If you specify a list of directories in your `.delivery/config.json` file under the `habitat['plan_dir']` key, it will return the list of corresponding plan contexts. Otherwise, it searches the project for Habitat plan files and returns an array of Habitat plan contexts that it can find (as determined by the presence of a `plan.sh` file). See the comment in the `helpers.rb` library for more information.
 
 `modified_habitat_plan_contexts`: returns a list of `habitat_plan_contexts` that were modified in the current change set.
