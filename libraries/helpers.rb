@@ -77,9 +77,10 @@ module HabitatBuildCookbook
     #   ]
     # }
     def habitat_plan_dir
-      if node['delivery']['config'].attribute?('habitat') &&
-         node['delivery']['config']['habitat'].attribute?('plan_dir')
+      if habitat_plan_dir_specified?
         [node['delivery']['config']['habitat']['plan_dir']].flatten
+      else
+        '/src/habitat'
       end
     end
 
@@ -102,7 +103,7 @@ module HabitatBuildCookbook
       # Assume that someone specifying the plan directories knows that they want
       # and defer to that list. Otherwise, search the repository for potential
       # Habitat plan directories.
-      plan_contexts = habitat_plan_dir || detect_plan_dirs
+      plan_contexts = habitat_plan_dir_specified? ? habitat_plan_dir : detect_plan_dirs
 
       # If the user did not specify any plan directories,
       # Search the repository for any habitat PLAN_CONTEXTs
@@ -175,6 +176,11 @@ module HabitatBuildCookbook
       else
         '/bin/hab'
       end
+    end
+
+    def habitat_plan_dir_specified?
+      node['delivery']['config'].attribute?('habitat') &&
+        node['delivery']['config']['habitat'].attribute?('plan_dir')
     end
 
     def changed_habitat_files?
