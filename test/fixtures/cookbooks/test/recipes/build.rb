@@ -23,5 +23,4 @@ hab_build 'testbuild' do
   auth_token 'abcdef'
   # ignore the failure because we won't have a valid auth token
   ignore_failure true
-  cleanup node['cleanup']
 end
