@@ -24,7 +24,10 @@ default['habitat-build']['depot-url'] = 'https://willem.habitat.sh/v1/depot'
 #
 #   * SC2034 - the variables we set are not used in the plan.sh
 #              https://github.com/koalaman/shellcheck/wiki/SC2034
+#   * SC2104 - there are variables set outside the plan.sh that can be used
+#              within the plan.sh (e.g. $plan_prefix)
+#              https://github.com/koalaman/shellcheck/wiki/SC2154
 #
 # TODO: (jtimberman) use this with the Delivery `config.json` data so
 # it's easier for users to modify.
-default['habitat-build']['shellcheck-excludes'] = ['SC2034']
+default['habitat-build']['shellcheck-excludes'] = %w( SC2034 SC2154 )
