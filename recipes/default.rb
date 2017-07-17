@@ -24,10 +24,14 @@ apt_update cookbook_name
 package ['xz-utils', 'shellcheck']
 
 hab_install 'latest-habitat' do
+  # temporarily pin to 0.25.1 while we work out https://github.com/habitat-sh/habitat/issues/2765
+  version '0.25.1'
   action :upgrade
 end
 
 hab_package 'core/hab-studio' do
+  # temporarily pin to 0.25.1 while we work out https://github.com/habitat-sh/habitat/issues/2765
+  version '0.25.1'
   action :upgrade
 end
 
