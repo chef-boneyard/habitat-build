@@ -56,8 +56,18 @@ action_class do
     ].join('-')
   end
 
+  # Read the last_build env file from the studio (if the path exists). Otherwise,
+  # read it from the CWD.
+  def last_build_env_file
+    if ::File.exist?(::File.join(hab_studio_path, 'src', 'results', 'last_build.env'))
+      ::File.join(hab_studio_path, 'src', 'results', 'last_build.env')
+    else
+      ::File.join(new_resource.cwd, 'results', 'last_build.env')
+    end
+  end
+
   def last_build_env
-    Hash[*::File.read(::File.join(hab_studio_path, 'src/results/last_build.env')).split(/[=\n]/)]
+    Hash[*::File.read(last_build_env_file).split(/[=\n]/)]
   end
 end
 

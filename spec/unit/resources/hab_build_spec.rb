@@ -26,9 +26,13 @@ end
 
 describe 'test::publish' do
   before do
+    allow(File).to receive(:exist?).and_call_original
     allow(File).to receive(:read).and_call_original
-    allow(File).to receive(:read).with(
+    allow(File).to receive(:exist?).with(
       '/hab/studios/testproject-teststage-testphase/src/results/last_build.env'
+    ).and_return(false)
+    allow(File).to receive(:read).with(
+      '/plans/results/last_build.env'
     ).and_return(<<-EOF
 pkg_origin=purple
 pkg_name=frogs
