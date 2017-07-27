@@ -26,10 +26,10 @@ end
 
 describe 'test::publish' do
   before do
-    allow(File).to receive(:exist?).and_call_original
+    allow(File).to receive(:directory?).and_call_original
     allow(File).to receive(:read).and_call_original
-    allow(File).to receive(:exist?).with(
-      '/hab/studios/testproject-teststage-testphase/src/results/last_build.env'
+    allow(File).to receive(:directory?).with(
+      '/hab/studios/testproject-teststage-testphase/src/results'
     ).and_return(false)
     allow(File).to receive(:read).with(
       '/plans/results/last_build.env'
@@ -59,7 +59,7 @@ EOF
       depot_url: 'https://private-depot.example.com/v1/depot'
     )
     expect(chef_run).to run_execute('upload-pkg').with(
-      command: '/bin/hab pkg upload --url https://private-depot.example.com/v1/depot /hab/studios/testproject-teststage-testphase/src/results/purple-frogs-0.7.0-dev-20170403213025-x86_64-linux.hart'
+      command: '/bin/hab pkg upload --url https://private-depot.example.com/v1/depot /plans/results/purple-frogs-0.7.0-dev-20170403213025-x86_64-linux.hart'
     )
   end
 end
