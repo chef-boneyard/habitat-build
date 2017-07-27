@@ -58,16 +58,16 @@ action_class do
 
   # Read the last_build env file from the studio (if the path exists). Otherwise,
   # read it from the CWD.
-  def last_build_env_file
-    if ::File.exist?(::File.join(hab_studio_path, 'src', 'results', 'last_build.env'))
-      ::File.join(hab_studio_path, 'src', 'results', 'last_build.env')
+  def results_dir
+    if ::File.directory?(::File.join(hab_studio_path, 'src', 'results'))
+      ::File.join(hab_studio_path, 'src', 'results')
     else
-      ::File.join(new_resource.cwd, 'results', 'last_build.env')
+      ::File.join(new_resource.cwd, 'results')
     end
   end
 
   def last_build_env
-    Hash[*::File.read(last_build_env_file).split(/[=\n]/)]
+    Hash[*::File.read(::File.join(results_dir, 'last_build.env')).split(/[=\n]/)]
   end
 end
 
@@ -94,7 +94,7 @@ action :publish do
   execute 'upload-pkg' do
     command(lazy do
       url_opt = "--url #{depot_url}" if depot_url
-      "#{hab_binary} pkg upload #{url_opt} #{hab_studio_path}/src/results/#{artifact}"
+      "#{hab_binary} pkg upload #{url_opt} #{results_dir}/#{artifact}"
     end)
     env({
       'HOME' => home_dir,
