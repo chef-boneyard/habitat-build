@@ -190,8 +190,6 @@ module HabitatBuildCookbook
     # if we're going to load secrets, we need to make sure we actually
     # have the data!
     def project_secrets_exist?(secret_keys = [])
-      load_delivery_chef_config
-
       begin
         key_data = get_project_secrets.to_hash
       rescue Net::HTTPServerException
