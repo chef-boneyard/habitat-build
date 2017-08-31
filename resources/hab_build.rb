@@ -103,7 +103,6 @@ action :publish do
     }.merge(new_resource.environment))
     retries new_resource.retries
     live_stream new_resource.live_stream
-    sensitive true
   end
 end
 
