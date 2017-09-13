@@ -7,6 +7,7 @@ property :origin, String, required: true
 property :plan_dir, String, required: true
 property :cwd, String, required: true
 property :depot_url, String
+property :channel, String
 property :environment, Hash, default: {}
 property :retries, Integer, default: 0
 property :artifact, String
@@ -93,8 +94,10 @@ end
 action :publish do
   execute 'upload-pkg' do
     command(lazy do
-      url_opt = "--url #{depot_url}" if depot_url
-      "#{hab_binary} pkg upload #{url_opt} #{results_dir}/#{artifact}"
+      url_opt = []
+      url_opt << "--channel #{channel}" if channel
+      url_opt << "--url #{depot_url}" if depot_url
+      "#{hab_binary} pkg upload #{url_opt.join(' ')} #{results_dir}/#{artifact}"
     end)
     env({
       'HOME' => home_dir,
