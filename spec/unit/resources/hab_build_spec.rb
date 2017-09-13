@@ -59,7 +59,7 @@ EOF
       depot_url: 'https://private-depot.example.com/v1/depot'
     )
     expect(chef_run).to run_execute('upload-pkg').with(
-      command: '/bin/hab pkg upload --url https://private-depot.example.com/v1/depot /plans/results/purple-frogs-0.7.0-dev-20170403213025-x86_64-linux.hart'
+      command: '/bin/hab pkg upload --channel stable --url https://private-depot.example.com/v1/depot /plans/results/purple-frogs-0.7.0-dev-20170403213025-x86_64-linux.hart'
     )
   end
 end
