@@ -18,6 +18,7 @@
 #
 # TODO: (jtimberman) Configure this from a Delivery `config.json`.
 default['habitat-build']['depot-url'] = 'https://willem.habitat.sh'
+default['habitat-build']['hab-version'] = '0.33.2'
 
 # An array of codes to ignore in shellcheck (lint checker). By default
 # we exclude:

@@ -23,7 +23,8 @@ apt_update cookbook_name
 
 package ['xz-utils', 'shellcheck']
 
-hab_install 'latest-habitat' do
+hab_install "hab-#{node['habitat-build']['hab-version']}" do
+  version node['habitat-build']['hab-version']
   action :upgrade
 end
 
