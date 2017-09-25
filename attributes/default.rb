@@ -17,7 +17,7 @@
 # By default we use the public Habitat Depot
 #
 # TODO: (jtimberman) Configure this from a Delivery `config.json`.
-default['habitat-build']['depot-url'] = 'https://willem.habitat.sh/v1/depot'
+default['habitat-build']['depot-url'] = 'https://willem.habitat.sh'
 
 # An array of codes to ignore in shellcheck (lint checker). By default
 # we exclude:
