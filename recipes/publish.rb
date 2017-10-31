@@ -18,31 +18,29 @@
 # limitations under the License.
 #
 
-if changed_habitat_files?
-  project_secrets = get_project_secrets
-  origin = 'delivery'
+project_secrets = get_project_secrets
+origin = 'delivery'
 
-  if habitat_origin_key?
-    keyname = project_secrets['habitat']['keyname']
+if habitat_origin_key?
+	keyname = project_secrets['habitat']['keyname']
     origin = keyname.split('-')[0...-1].join('-')
-  end
+end
 
-  # Only build and publish if we have a depot token
-  if habitat_depot_token? # ~FC023
-    modified_habitat_plan_contexts.each do |plan_context|
-      # Inside the build context, the "root" is called '/src'. In that scenario,
-      # we want to use the project name as the package name
-      pkg_name = plan_context == '/src' ? node['delivery']['change']['project'] : Pathname(plan_context).basename.to_s
+# Only build and publish if we have a depot token
+if habitat_depot_token? # ~FC023
+	modified_habitat_plan_contexts.each do |plan_context|
+		# Inside the build context, the "root" is called '/src'. In that scenario,
+		# we want to use the project name as the package name
+		pkg_name = plan_context == '/src' ? node['delivery']['change']['project'] : Pathname(plan_context).basename.to_s
 
-      hab_build pkg_name do
-        origin origin
-        plan_dir plan_context
-        cwd workflow_workspace_repo
-        home_dir workflow_workspace
-        auth_token project_secrets['habitat']['depot_token']
-        depot_url node['habitat-build']['depot-url']
-        action [:build, :publish, :save_application_release]
-      end
-    end
-  end
+		hab_build pkg_name do
+			origin origin
+			plan_dir plan_context
+			cwd workflow_workspace_repo
+			home_dir workflow_workspace
+			auth_token project_secrets['habitat']['depot_token']
+			depot_url node['habitat-build']['depot-url']
+			action [:build, :publish, :save_application_release]
+		end
+	end
 end
