@@ -2,14 +2,12 @@ require_relative '../libraries/helpers'
 
 resource_name :hab_build
 
-property :name, String, name_property: true
 property :origin, String, required: true
 property :plan_dir, String, required: true
 property :cwd, String, required: true
 property :depot_url, String
 property :channel, String
 property :environment, Hash, default: {}
-property :retries, Integer, default: 0
 property :artifact, String
 property :home_dir, String
 property :auth_token, String
