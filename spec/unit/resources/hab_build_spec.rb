@@ -42,7 +42,7 @@ pkg_ident=purple/frogs/0.7.0-dev/20170403213025
 pkg_artifact=purple-frogs-0.7.0-dev-20170403213025-x86_64-linux.hart
 pkg_sha256sum=f879e8f7191f07f51f394d574b26611e820161114987123878d327f2ae64dab8
 pkg_blake2bsum=17d058114159f2a5dbc6ffea2d1526f89b33944bbd9fd75cec79c97e10d4d2dd
-EOF
+    EOF
                 )
   end
 
@@ -79,7 +79,7 @@ describe 'test::save_application_release' do
   pkg_artifact=purple-frogs-0.7.0-dev-20170403213025-x86_64-linux.hart
   pkg_sha256sum=f879e8f7191f07f51f394d574b26611e820161114987123878d327f2ae64dab8
   pkg_blake2bsum=17d058114159f2a5dbc6ffea2d1526f89b33944bbd9fd75cec79c97e10d4d2dd
-  EOF
+      EOF
                   )
     end
 
