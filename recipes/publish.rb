@@ -1,8 +1,8 @@
 #
-# Cookbook Name:: habitat-build
+# Cookbook:: habitat-build
 # Recipe:: publish
 #
-# Copyright:: Copyright (c) 2016 Chef Software Inc.
+# Copyright:: 2016-2019, Chef Software Inc.
 # License:: Apache License, Version 2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,7 +28,7 @@ if changed_habitat_files?
   end
 
   # Only build and publish if we have a depot token
-  if habitat_depot_token? # ~FC023
+  if habitat_depot_token?
     modified_habitat_plan_contexts.each do |plan_context|
       # Inside the build context, the "root" is called '/src'. In that scenario,
       # we want to use the project name as the package name

@@ -1,8 +1,8 @@
 #
-# Cookbook Name:: habitat-build
+# Cookbook:: habitat-build
 # Recipe:: default
 #
-# Copyright:: Copyright (c) 2016 Chef Software Inc.
+# Copyright:: 2016-2019, Chef Software Inc.
 # License:: Apache License, Version 2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,7 +21,7 @@
 # not available on earlier Ubuntu releases.
 apt_update cookbook_name
 
-package ['xz-utils', 'shellcheck']
+package %w(xz-utils shellcheck)
 
 hab_install 'latest-habitat' do
   action :upgrade

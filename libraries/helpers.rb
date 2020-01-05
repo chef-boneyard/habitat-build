@@ -1,5 +1,5 @@
 #
-# Copyright:: Copyright (c) 2016 Chef Software Inc.
+# Copyright:: 2016-2019, Chef Software Inc.
 # License:: Apache License, Version 2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -208,5 +208,5 @@ module HabitatBuildCookbook
   end
 end
 
-Chef::Recipe.send(:include, HabitatBuildCookbook::Helpers)
-Chef::Resource.send(:include, HabitatBuildCookbook::Helpers)
+Chef::Recipe.include HabitatBuildCookbook::Helpers
+Chef::Resource.include HabitatBuildCookbook::Helpers
