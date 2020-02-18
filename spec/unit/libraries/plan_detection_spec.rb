@@ -44,7 +44,7 @@ describe 'test::detect' do
     let(:chef_run) do
       ChefSpec::SoloRunner.new(
         platform: 'redhat',
-        version: '7.2'
+        version: '7'
       ) do |node|
         node.normal['delivery'] = cli_node['delivery']
         node.normal['delivery_builder'] = cli_node['delivery_builder']
@@ -63,7 +63,7 @@ describe 'test::detect' do
     let(:chef_run) do
       ChefSpec::SoloRunner.new(
         platform: 'redhat',
-        version: '7.2'
+        version: '7'
       ) do |node|
         node.normal['delivery'] = cli_node['delivery']
         node.normal['delivery_builder'] = cli_node['delivery_builder']
@@ -88,7 +88,7 @@ describe 'test::detect' do
     let(:chef_run) do
       ChefSpec::SoloRunner.new(
         platform: 'redhat',
-        version: '7.2'
+        version: '7'
       ) do |node|
         node.normal['delivery'] = cli_node['delivery']
         node.normal['delivery_builder'] = cli_node['delivery_builder']

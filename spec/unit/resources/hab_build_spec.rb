@@ -7,7 +7,7 @@ describe 'test::build' do
       ChefSpec::SoloRunner.new(
         step_into: ['hab_build'],
         platform: 'redhat',
-        version: '7.2'
+        version: '7'
       ).converge(described_recipe)
     end
 
@@ -50,7 +50,7 @@ pkg_blake2bsum=17d058114159f2a5dbc6ffea2d1526f89b33944bbd9fd75cec79c97e10d4d2dd
     ChefSpec::SoloRunner.new(
       step_into: ['hab_build'],
       platform: 'redhat',
-      version: '7.2'
+      version: '7'
     ).converge(described_recipe)
   end
 
@@ -87,7 +87,7 @@ describe 'test::save_application_release' do
       ChefSpec::SoloRunner.new(
         step_into: ['hab_build'],
         platform: 'redhat',
-        version: '7.2'
+        version: '7'
       ) do |node|
         node.normal['delivery']['change'] = {}
         node.normal['delivery']['workspace'] = {}
