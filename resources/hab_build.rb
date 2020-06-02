@@ -1,6 +1,6 @@
 require_relative '../libraries/helpers'
 
-resource_name :hab_build
+provides :hab_build
 
 property :origin, String, required: true
 property :plan_dir, String, required: true
