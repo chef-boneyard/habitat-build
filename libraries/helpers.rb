@@ -208,5 +208,5 @@ module HabitatBuildCookbook
   end
 end
 
-Chef::Recipe.include HabitatBuildCookbook::Helpers
+Chef::DSL::Recipe.include HabitatBuildCookbook::Helpers
 Chef::Resource.include HabitatBuildCookbook::Helpers
